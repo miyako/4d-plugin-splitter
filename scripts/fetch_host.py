@@ -35,6 +35,11 @@ def fetch_archive(entry, archive):
         raise RuntimeError("Host archive checksum changed; review and repin explicitly")
 
 
+def extract_archive(archive, destination):
+    with tarfile.open(archive, "r:*") as bundle:
+        bundle.extractall(destination, filter="data")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", choices=("macos-arm64", "macos-x86_64",
@@ -60,8 +65,7 @@ def main():
         fetch_archive(entry, archive)
         extracted = temp / "host"
         extracted.mkdir()
-        with tarfile.open(archive, "r:xz") as bundle:
-            bundle.extractall(extracted, filter="data")
+        extract_archive(archive, extracted)
         executable = extracted / entry["executable"]
         version = host_version(executable)
         if version != expected_version:

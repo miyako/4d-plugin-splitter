@@ -6,6 +6,7 @@ import plistlib
 import struct
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
@@ -21,6 +22,18 @@ import fetch_host
 
 
 class HostCacheTests(unittest.TestCase):
+    def test_compression_is_detected_from_bytes_not_extension(self):
+        for compression in ("xz", "bz2"):
+            with self.subTest(compression=compression), tempfile.TemporaryDirectory() as temp:
+                archive = pathlib.Path(temp) / "host.tar.xz"
+                member = tarfile.TarInfo("tool4d/tool4d.exe")
+                member.size = 4
+                with tarfile.open(archive, "w:"+compression) as package:
+                    package.addfile(member, io.BytesIO(b"host"))
+                destination = pathlib.Path(temp) / "restored"
+                fetch_host.extract_archive(archive, destination)
+                self.assertEqual((destination / member.name).read_bytes(), b"host")
+
     def test_cached_archives_are_revalidated_without_network(self):
         with tempfile.TemporaryDirectory() as temp:
             archive = pathlib.Path(temp) / "host.tar.xz"
