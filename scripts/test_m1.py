@@ -7,11 +7,10 @@ import json
 import pathlib
 import platform
 import shutil
-import subprocess
 import tempfile
 
 from check_host import ROOT, payload, run_host
-from binary import architecture
+from binary import architecture, host_version
 
 
 def verify(result, compiled):
@@ -37,7 +36,7 @@ def main():
     plugin = args.plugin.resolve(strict=True)
     manifest = json.loads((plugin / "Contents/Resources/manifest.json").read_text(encoding="utf-8"))
     thread_safe = manifest["commands"][0]["threadSafe"]
-    version = subprocess.run([str(host), "--version"], check=True, capture_output=True, text=True).stdout.strip()
+    version = host_version(host)
     host_architecture = architecture(host)
     target = "arm64_macOS_lib" if platform.system() == "Darwin" and host_architecture == "arm64" else "x86_64_generic"
     args.report.parent.mkdir(parents=True, exist_ok=True)

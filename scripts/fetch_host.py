@@ -6,12 +6,12 @@ import hashlib
 import json
 import pathlib
 import shutil
-import subprocess
 import tarfile
 import tempfile
 import urllib.request
 
 from check_host import ROOT
+from binary import host_version
 
 
 def fetch_archive(entry, archive):
@@ -63,13 +63,9 @@ def main():
         with tarfile.open(archive, "r:xz") as bundle:
             bundle.extractall(extracted, filter="data")
         executable = extracted / entry["executable"]
-        result = subprocess.run([str(executable), "--version"],
-                                capture_output=True, text=True, timeout=60)
-        if result.returncode:
-            raise RuntimeError(f"Host version probe failed (exit {result.returncode}): "
-                               f"{result.stdout}\n{result.stderr}")
-        if result.stdout.strip() != expected_version:
-            raise RuntimeError(f"Unexpected host version: {result.stdout!r}")
+        version = host_version(executable)
+        if version != expected_version:
+            raise RuntimeError(f"Unexpected host version: {version!r}")
         shutil.move(str(extracted), str(destination))
     print(f"Verified {expected_version} ({args.platform}): {destination / entry['executable']}")
 

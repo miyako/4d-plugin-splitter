@@ -2,6 +2,7 @@ import importlib.util
 import hashlib
 import io
 import pathlib
+import plistlib
 import struct
 import subprocess
 import sys
@@ -51,6 +52,21 @@ class HostCacheTests(unittest.TestCase):
 
 
 class BinaryTests(unittest.TestCase):
+    def test_bundle_version_does_not_claim_runtime_success(self):
+        with tempfile.TemporaryDirectory() as temp:
+            contents = pathlib.Path(temp) / "tool4d.app/Contents"
+            executable = contents / "MacOS/tool4d"
+            executable.parent.mkdir(parents=True)
+            with (contents / "Info.plist").open("wb") as target:
+                plistlib.dump({"CFBundleShortVersionString": "21.1 build 21.100562"}, target)
+            with mock.patch.object(BINARY.subprocess, "run") as run:
+                self.assertEqual(BINARY.host_version(executable), "21.1 build 21.100562")
+                run.assert_not_called()
+            with (contents / "Info.plist").open("wb") as target:
+                plistlib.dump({"CFBundleShortVersionString": 123}, target)
+            with self.assertRaises(RuntimeError):
+                BINARY.host_version(executable)
+
     def test_exact_native_machine_types(self):
         with tempfile.TemporaryDirectory() as temp:
             path = pathlib.Path(temp) / "binary"

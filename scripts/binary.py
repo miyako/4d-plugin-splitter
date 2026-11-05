@@ -1,7 +1,24 @@
 """Minimal CPU identification for the native hosts and produced plug-ins."""
 
 import pathlib
+import plistlib
 import struct
+import subprocess
+
+
+def host_version(path):
+    executable = pathlib.Path(path)
+    if executable.parent.name == "MacOS":
+        # 21.1 --version can crash on hosted runners; this identifies the pinned
+        # bundle only. Actual interpreted/compiled execution is checked separately.
+        with (executable.parent.parent / "Info.plist").open("rb") as source:
+            version = plistlib.load(source)["CFBundleShortVersionString"]
+        if not isinstance(version, str) or not version:
+            raise RuntimeError("Host bundle version must be nonempty text")
+        return version
+    result = subprocess.run([str(executable), "--version"], check=True,
+                            capture_output=True, text=True, timeout=60)
+    return result.stdout.strip()
 
 
 def architecture(path):

@@ -19,7 +19,7 @@ foreach(target splitter_icu_stub splitter_icu_common splitter_icu_i18n)
     set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE
         CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN TRUE)
 endforeach()
-target_include_directories(splitter_icu_i18n PRIVATE "${icu_source}/i18n")
+target_include_directories(splitter_icu_i18n SYSTEM PUBLIC "${icu_source}/i18n")
 target_compile_definitions(splitter_icu_common PRIVATE U_COMMON_IMPLEMENTATION)
 target_compile_definitions(splitter_icu_i18n PRIVATE U_I18N_IMPLEMENTATION)
 target_compile_definitions(splitter_icu_stub PRIVATE U_DATA_IMPLEMENTATION)

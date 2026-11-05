@@ -218,11 +218,15 @@ Normal build packages are unsigned. They are local files or Actions artifacts,
 not published releases.
 
 `scripts/fetch_host.py` restores a public host into a **new isolated directory**,
-verifying both archive SHA-256 and executable version against
+verifying both archive SHA-256 and host version against
 [`tests/tool4d.lock.json`](tests/tool4d.lock.json). Download URLs are mutable;
 a checksum change fails rather than silently accepting a new host. Optional
 `--cache-dir` caches archives only and verifies their checksums on every restore.
 The host itself is not shipped with Splitter.
+On macOS, version identification uses the pinned bundle's plist: the 21.1
+`--version` command crashed on hosted runners even after printing its version.
+Metadata verification does **not** establish runtime compatibility; actual
+source/compiled host runs must still exit successfully and pass every assertion.
 
 [`native.yml`](.github/workflows/native.yml) builds a universal macOS package,
 checks it on native arm64 and native Intel hosts, and builds/tests Windows x64.
