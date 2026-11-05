@@ -237,6 +237,7 @@ processes on pinned 21.1; all three build platforms check interpreted and
 compiled behavior on pinned 20.7. Dependency caches contain checksum-verified source/host archives, not
 compiled libraries or credentials. Actions use immutable revisions and
 read-only permissions; normal builds never receive signing secrets.
+Builds run on pull requests and main pushes without duplicate feature-push jobs.
 No workflow publishes releases or tags. Generated packages, host installations
 and ongoing CI evidence stay in ignored `build/`/`dist/` or Actions artifacts.
 The small checked-in JSON reports retain their original historical provenance.
@@ -275,7 +276,9 @@ for every later 4D or OS release.
 
 The native core passed 31,185 checks on arm64 and on the translated x86_64
 slice, including eight-thread stress. Translated execution is not native Intel
-validation. The remote CI workflow has not been run from this worktree.
+validation. Remote platform results and downloadable evidence are available in
+the [native workflow runs](https://github.com/miyako/4d-plugin-splitter/actions/workflows/native.yml);
+only completed successful jobs establish those additional observations.
 
 The host runner asserts actual interpreted and compiled execution, native
 parity across 1,248 cases per mode, extended Unicode/regex/list/error/limit
@@ -295,7 +298,8 @@ The 21.1 run additionally passed 9,600 assertions across eight processes
 confirmed preemptive at runtime. The 20.7 run did **not** validate preemptive
 execution: its compiler does not support the newer `Process info` observer.
 This limited macOS evidence is not a general bridge-safety certification;
-Windows, physical Intel and 20.7 preemptive execution remain unverified.
+these local reports do not establish Windows, native Intel or 20.7 preemptive
+support. Consult the corresponding CI evidence for remote platform observations.
 
 Earlier SDK investigations remain under `tests/evidence/` as historical
 observations, not current blockers: Variant omission fails, typed Longint and
