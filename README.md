@@ -227,10 +227,10 @@ The host itself is not shipped with Splitter.
 [`native.yml`](.github/workflows/native.yml) builds a universal macOS package,
 checks it on native arm64 and native Intel hosts, and builds/tests Windows x64.
 The Intel job checks the **same universal package** produced by the arm64 job.
-It also builds/tests independently with the native Intel toolchain. The arm64
-job additionally checks eight actual compiled preemptive processes on pinned
-21.1; all three platforms check interpreted and compiled behavior on pinned
-20.7. Dependency caches contain checksum-verified source/host archives, not
+It also builds/tests independently with the native Intel toolchain. A separate
+macOS 26 arm64 job checks the same package in eight actual compiled preemptive
+processes on pinned 21.1; all three build platforms check interpreted and
+compiled behavior on pinned 20.7. Dependency caches contain checksum-verified source/host archives, not
 compiled libraries or credentials. Actions use immutable revisions and
 read-only permissions; normal builds never receive signing secrets.
 No workflow publishes releases or tags. Generated packages, host installations

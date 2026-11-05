@@ -63,8 +63,11 @@ def main():
         with tarfile.open(archive, "r:xz") as bundle:
             bundle.extractall(extracted, filter="data")
         executable = extracted / entry["executable"]
-        result = subprocess.run([str(executable), "--version"], check=True,
+        result = subprocess.run([str(executable), "--version"],
                                 capture_output=True, text=True, timeout=60)
+        if result.returncode:
+            raise RuntimeError(f"Host version probe failed (exit {result.returncode}): "
+                               f"{result.stdout}\n{result.stderr}")
         if result.stdout.strip() != expected_version:
             raise RuntimeError(f"Unexpected host version: {result.stdout!r}")
         shutil.move(str(extracted), str(destination))

@@ -58,12 +58,6 @@ jobs:
             --plugin build/unpacked/Splitter.bundle --report build/host-arm64.json
           tar -czf build/native-test-runner.tar.gz -C build splitter_native_tests \
             -C plugins/Splitter.bundle/Contents/Resources/licenses ICU-LICENSE.txt
-      - name: Restore pinned preemptive-observer host
-        run: python scripts/fetch_host.py --platform macos-arm64-21.1 --destination build/host-21 --cache-dir build/host-archives
-      - name: Verify actual compiled preemptive execution
-        run: |
-          python scripts/test_m1.py --tool4d build/host-21/tool4d.app/Contents/MacOS/tool4d \
-            --plugin build/unpacked/Splitter.bundle --preemptive --report build/host-arm64-21.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: macos-universal
@@ -72,7 +66,6 @@ jobs:
             build/Splitter-macos-universal.zip
             build/native-test-runner.tar.gz
             build/host-arm64.json
-            build/host-arm64-21.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
@@ -80,6 +73,38 @@ jobs:
           path: |
             build/Testing/Temporary/
             build/host-*.json
+
+  macos-preemptive:
+    needs: macos-universal
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: build/host-archives
+          key: hosts-arm64-21-${{ hashFiles('tests/tool4d.lock.json') }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: macos-universal
+          path: build/incoming
+      - name: Verify the same universal package on the newer host
+        run: |
+          test "$(uname -m)" = arm64
+          python scripts/unpack.py build/incoming/Splitter-macos-universal.zip build/unpacked
+          python scripts/fetch_host.py --platform macos-arm64-21.1 --destination build/host-21 --cache-dir build/host-archives
+          python scripts/test_m1.py --tool4d build/host-21/tool4d.app/Contents/MacOS/tool4d \
+            --plugin build/unpacked/Splitter.bundle --preemptive --report build/host-arm64-21.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos-preemptive-evidence
+          if-no-files-found: error
+          path: build/host-arm64-21.json
 
   macos-intel:
     needs: macos-universal
