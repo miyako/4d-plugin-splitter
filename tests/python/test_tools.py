@@ -93,6 +93,11 @@ class PackageTests(unittest.TestCase):
                 destination = pathlib.Path(temp) / "output"
                 with zipfile.ZipFile(archive, "w") as package:
                     package.writestr(name, "bad")
+                if "\\" in name:
+                    archive.write_bytes(archive.read_bytes().replace(
+                        name.replace("\\", "/").encode("utf-8"), name.encode("utf-8")))
+                with zipfile.ZipFile(archive) as package:
+                    self.assertEqual(package.infolist()[0].orig_filename, name)
                 result = subprocess.run(
                     [sys.executable, str(ROOT / "scripts/unpack.py"), str(archive), str(destination)],
                     capture_output=True, text=True,

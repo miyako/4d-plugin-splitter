@@ -20,6 +20,8 @@ def main():
         names = set()
         total_size = 0
         for entry in archive.infolist():
+            if entry.orig_filename != entry.filename:
+                raise RuntimeError(f"Normalized archive member: {entry.orig_filename!r}")
             path = pathlib.PurePosixPath(entry.filename)
             if path.is_absolute() or ".." in path.parts or "\\" in entry.filename:
                 raise RuntimeError(f"Unsafe archive member: {entry.filename}")
