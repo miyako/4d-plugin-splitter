@@ -1,0 +1,24 @@
+{
+  "version": "20.7 build 20.101905",
+  "macos-arm64": {
+    "url": "https://resources-download.4d.com/release/20.x/20.7/latest/mac/tool4d_arm64.tar.xz",
+    "sha256": "40a5d177a4f73165f52abf6ec8000249d81411c41353ccf258cece8e74639261",
+    "executable": "tool4d.app/Contents/MacOS/tool4d"
+  },
+  "macos-x86_64": {
+    "url": "https://resources-download.4d.com/release/20.x/20.7/latest/mac/tool4d_x86_64.tar.xz",
+    "sha256": "12eafd79db4d3cd520b5c1fb30c85a99edc20a4ad7ae0a1cc5d2692e962cdd9e",
+    "executable": "tool4d.app/Contents/MacOS/tool4d"
+  },
+  "windows-x64": {
+    "url": "https://resources-download.4d.com/release/20.x/20.7/latest/win/tool4d_win.tar.xz",
+    "sha256": "31d5300ca38df9b18b32c07835ab9b1e1cf0deee6c936a382581723ed0edd4dc",
+    "executable": "tool4d/tool4d.exe"
+  },
+  "macos-arm64-21.1": {
+    "version": "21.1 build 21.100562",
+    "url": "https://resources-download.4d.com/release/21.x/21.1/latest/mac/tool4d_arm64.tar.xz",
+    "sha256": "98c5ebfd20135ee0f2874344bd055aae39f5d84a542f14d385292bbaa5451cd4",
+    "executable": "tool4d.app/Contents/MacOS/tool4d"
+  }
+}

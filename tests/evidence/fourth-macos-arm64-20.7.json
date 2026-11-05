@@ -1,0 +1,584 @@
+{
+  "host": "20.7 build 20.101905",
+  "platform": "macos-arm64",
+  "cases": {
+    "v_two": {
+      "syntax": "Splitter_fourth_v(&T;&T;&L;&V):C",
+      "call": "Splitter_fourth_v(\" a ,b,\"; \",\")",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=5\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          },
+          {
+            "message": "Not enough parameters were passed to this plug-in command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    },
+    "v_three": {
+      "syntax": "Splitter_fourth_v(&T;&T;&L;&V):C",
+      "call": "Splitter_fourth_v(\" a ,b,\"; \",\"; 0)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=5\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          },
+          {
+            "message": "Not enough parameters were passed to this plug-in command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    },
+    "v_object": {
+      "syntax": "Splitter_fourth_v(&T;&T;&L;&V):C",
+      "call": "Splitter_fourth_v(\" a ,b,\"; \",\"; 0; New object:C1471(\"mode\"; \"literal\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=38\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=38\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "v_collection": {
+      "syntax": "Splitter_fourth_v(&T;&T;&L;&V):C",
+      "call": "Splitter_fourth_v(\" a ,b,\"; \",\"; 0; New collection:C1472(\",\"; \";\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=42\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=42\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "v_null": {
+      "syntax": "Splitter_fourth_v(&T;&T;&L;&V):C",
+      "call": "Splitter_fourth_v(\" a ,b,\"; \",\"; 0; Null)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=-1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_KIND=-1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "j_two": {
+      "syntax": "Splitter_fourth_j(&T;&T;&L;&J):C",
+      "call": "Splitter_fourth_j(\" a ,b,\"; \",\")",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "j_three": {
+      "syntax": "Splitter_fourth_j(&T;&T;&L;&J):C",
+      "call": "Splitter_fourth_j(\" a ,b,\"; \",\"; 0)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "j_object": {
+      "syntax": "Splitter_fourth_j(&T;&T;&L;&J):C",
+      "call": "Splitter_fourth_j(\" a ,b,\"; \",\"; 0; New object:C1471(\"mode\"; \"literal\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "j_collection": {
+      "syntax": "Splitter_fourth_j(&T;&T;&L;&J):C",
+      "call": "Splitter_fourth_j(\" a ,b,\"; \",\"; 0; New collection:C1472(\",\"; \";\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": false,
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "The result of the function is not compatible with the expression.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          },
+          {
+            "message": "This value cannot be passed as a parameter to this method or command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    },
+    "j_null": {
+      "syntax": "Splitter_fourth_j(&T;&T;&L;&J):C",
+      "call": "Splitter_fourth_j(\" a ,b,\"; \",\"; 0; Null)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_OBJECT_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "c_two": {
+      "syntax": "Splitter_fourth_c(&T;&T;&L;&C):C",
+      "call": "Splitter_fourth_c(\" a ,b,\"; \",\")",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "c_three": {
+      "syntax": "Splitter_fourth_c(&T;&T;&L;&C):C",
+      "call": "Splitter_fourth_c(\" a ,b,\"; \",\"; 0)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "c_object": {
+      "syntax": "Splitter_fourth_c(&T;&T;&L;&C):C",
+      "call": "Splitter_fourth_c(\" a ,b,\"; \",\"; 0; New object:C1471(\"mode\"; \"literal\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": false,
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "The result of the function is not compatible with the expression.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          },
+          {
+            "message": "This value cannot be passed as a parameter to this method or command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_fourth",
+              "path": "probe_fourth",
+              "file": "[object File]"
+            },
+            "line": 4,
+            "lineInFile": 5
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    },
+    "c_collection": {
+      "syntax": "Splitter_fourth_c(&T;&T;&L;&C):C",
+      "call": "Splitter_fourth_c(\" a ,b,\"; \",\"; 0; New collection:C1472(\",\"; \";\"))",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "c_null": {
+      "syntax": "Splitter_fourth_c(&T;&T;&L;&C):C",
+      "call": "Splitter_fourth_c(\" a ,b,\"; \",\"; 0; Null)",
+      "source": {
+        "compiled": false,
+        "equal": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":false,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "source_execution_status": "executed",
+      "source_argument_preserved": true,
+      "compilation": {
+        "success": true,
+        "errors": []
+      },
+      "compiled": {
+        "compiled": true,
+        "equal": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_FOURTH={\"compiled\":true,\"equal\":1}",
+        "stderr": "SPLITTER_FOURTH_COLLECTION_NULL=1\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    }
+  },
+  "source_sha256": {
+    "src/plugin/probe.cpp": "bf045ff39a38c8f25106fb318541379ea8f824fcb53ab7718a5c166d7cd33c6d",
+    "resources/manifest.json": "a6b9688693a0c05b7b3cce45629580528be9b1e40454ab0c915d02b5d7b7d932",
+    "scripts/check_fourth.py": "3a64e33b84cab32baddfdb938812374afc6df839d9ff30df65d591fe0e7cfc80",
+    "scripts/check_host.py": "b40e35c3ebd262de4c93409d8daef5138e21fba1db417613aeba2a1e50871bdb",
+    "tests/fourth/probe_matrix.4dm.in": "f554e838c61c5756641aca3603d99d514035cf9c0602583e2b351d120a8042d6"
+  },
+  "plugin_sha256": "80bdbbc002518778f4855b0673f72299d1d309213a6c17e06deed625ce8a3f8a"
+}

@@ -1,0 +1,17 @@
+{
+  "sdk": {
+    "repository": "https://github.com/4d/4D-Plugin-SDK",
+    "revision": "cd97d1876d4258b56d2516e8ad2816f4ee93e0b5",
+    "url": "https://codeload.github.com/4d/4D-Plugin-SDK/tar.gz/cd97d1876d4258b56d2516e8ad2816f4ee93e0b5",
+    "sha256": "1ed7ae7f9346737c440a82e46e261de79dbb6dbead13fe52f3f3dc0d6d2aa862",
+    "status": "pinned"
+  },
+  "icu": {
+    "repository": "https://github.com/unicode-org/icu",
+    "version": "79.1",
+    "revision": "ddc6b66926bfac6036144ca9902992a0d6d50af9",
+    "url": "https://github.com/unicode-org/icu/releases/download/release-79.1/icu4c-79.1-sources.tgz",
+    "sha256": "06fa63ecb521048f8082f12ad988f6b678d90cbd88aafce24cbc94902b191d99",
+    "data_sha256": "208a8392975e81a351fd9e3759f7a2c7a5659c97ef258c7a7435e2d9c31a61ce"
+  }
+}

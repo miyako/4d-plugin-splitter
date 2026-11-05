@@ -1,0 +1,29 @@
+{
+  "host": "20.7 build 20.101905",
+  "platform": "macos-arm64",
+  "source": {
+    "stdout": "SPLITTER_ASSERT_NATIVE_DONESPLITTER_ERROR=[{\"errCode\":-10518,\"componentSignature\":\"4DRT\",\"message\":\"Assert failed: Splitter direct assertion\"}]SPLITTER_ASSERT_DIRECT_DONESPLITTER_NULL={\"compiled\":false,\"resultIsNull\":true}",
+    "stderr": "SPLITTER_ASSERT status=-10518\ntool4d.4DRT [-10518] Assert failed: Splitter (task=-1, taskName=Main task)\ntool4d.4DRT [-10518] Assert failed: Splitter direct assertion (task=-1, taskName=Main task)\n"
+  },
+  "compilation": {
+    "success": true,
+    "errors": []
+  },
+  "compiled": {
+    "stdout": "SPLITTER_ASSERT_NATIVE_DONESPLITTER_ERROR=[{\"errCode\":-10518,\"componentSignature\":\"4DRT\",\"message\":\"Assert failed: Splitter direct assertion\"}]SPLITTER_ASSERT_DIRECT_DONESPLITTER_NULL={\"compiled\":true,\"resultIsNull\":true}",
+    "stderr": "SPLITTER_ASSERT status=-10518\ntool4d.4DRT [-10518] Assert failed: Splitter (task=-1, taskName=Main task)\ntool4d.4DRT [-10518] Assert failed: Splitter direct assertion (task=-1, taskName=Main task)\n"
+  },
+  "observations": {
+    "sdk_assert_invokes_host_handler": false,
+    "direct_assert_invokes_host_handler": true,
+    "null_collection_result_is_actual_null": true
+  },
+  "source_sha256": {
+    "src/plugin/probe.cpp": "bf045ff39a38c8f25106fb318541379ea8f824fcb53ab7718a5c166d7cd33c6d",
+    "resources/manifest.json": "a6b9688693a0c05b7b3cce45629580528be9b1e40454ab0c915d02b5d7b7d932",
+    "scripts/check_errors.py": "36c431ce101992bdda06a7c741304ed0c59e3012867f81c09f16960fea9d7baa",
+    "scripts/check_host.py": "b40e35c3ebd262de4c93409d8daef5138e21fba1db417613aeba2a1e50871bdb",
+    "tests/errors/probe_errors.4dm": "d12f556431c7d7e4f6c498a0533cd133eb162d66183c7e7f840b074f3c4ec3f5"
+  },
+  "plugin_sha256": "80bdbbc002518778f4855b0673f72299d1d309213a6c17e06deed625ce8a3f8a"
+}

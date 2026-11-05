@@ -1,0 +1,11 @@
+{
+  "name": "Splitter",
+  "id": 20371,
+  "commands": [
+    {
+      "theme": "Splitter",
+      "syntax": "Split_string_Ex(&T;&T;&L;&J):C",
+      "threadSafe": true
+    }
+  ]
+}

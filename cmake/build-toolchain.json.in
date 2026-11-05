@@ -1,0 +1,9 @@
+{
+  "compiler": "@CMAKE_CXX_COMPILER_ID@",
+  "compilerVersion": "@CMAKE_CXX_COMPILER_VERSION@",
+  "system": "@CMAKE_SYSTEM_NAME@",
+  "processor": "@CMAKE_SYSTEM_PROCESSOR@",
+  "macArchitectures": "@CMAKE_OSX_ARCHITECTURES@",
+  "macDeploymentTarget": "@CMAKE_OSX_DEPLOYMENT_TARGET@",
+  "generator": "@CMAKE_GENERATOR@"
+}

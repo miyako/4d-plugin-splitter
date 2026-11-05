@@ -1,0 +1,7 @@
+//%attributes = {"invisible":true}
+var $actual; $expected : Collection
+var $report : Object
+$expected:=Split string:C1554(" a ,b,"; ",")
+$actual:=@CALL@
+$report:=New object:C1471("compiled"; Is compiled mode:C492; "equal"; Splitter_equal($actual; $expected))
+LOG EVENT:C667(Into system standard outputs:K38:9; "SPLITTER_FOURTH="+JSON Stringify:C1217($report); Information message:K38:1)
