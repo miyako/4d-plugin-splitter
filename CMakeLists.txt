@@ -62,6 +62,7 @@ function(splitter_bundle target source manifest output_directory)
             RUNTIME_OUTPUT_DIRECTORY "${contents}/Windows64")
         foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
             set_target_properties(${target} PROPERTIES
+                LIBRARY_OUTPUT_DIRECTORY_${config} "${contents}/Windows64"
                 RUNTIME_OUTPUT_DIRECTORY_${config} "${contents}/Windows64")
         endforeach()
         target_sources(${target} PRIVATE "${sdk_dir}/4DPluginAPI.def")
