@@ -21,16 +21,7 @@ def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout.strip()
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("patch", "minor", "major"))
-    args = parser.parse_args()
-    if (os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch"
-            or os.environ.get("GITHUB_REF") != "refs/heads/main"):
-        raise RuntimeError("Version bumps must be dispatched from main.")
-    if git("status", "--porcelain"):
-        raise RuntimeError("Version bumps require a clean checkout.")
-
+def read_version_sources():
     sources = {}
     current = None
     for filename, pattern in FIELDS:
@@ -45,7 +36,29 @@ def main():
             current = value
         elif value != current:
             raise RuntimeError(f"{filename}: version {value} differs from CMake version {current}")
+    return current, sources
 
+
+def require_unused_tag(version):
+    tag = subprocess.run(["git", "ls-remote", "--exit-code", "origin", f"refs/tags/v{version}"],
+                         capture_output=True, text=True)
+    if tag.returncode == 0:
+        raise RuntimeError(f"Version v{version} is already tagged; refusing to reuse it.")
+    if tag.returncode != 2:
+        raise RuntimeError(f"Could not inspect remote version tags: {tag.stderr.strip()}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("mode", choices=("patch", "minor", "major"))
+    args = parser.parse_args()
+    if (os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch"
+            or os.environ.get("GITHUB_REF") != "refs/heads/main"):
+        raise RuntimeError("Version bumps must be dispatched from main.")
+    if git("status", "--porcelain"):
+        raise RuntimeError("Version bumps require a clean checkout.")
+
+    current, sources = read_version_sources()
     major, minor, patch = map(int, current.split("."))
     if args.mode == "major":
         major, minor, patch = major + 1, 0, 0
@@ -54,13 +67,7 @@ def main():
     else:
         patch += 1
     new = f"{major}.{minor}.{patch}"
-
-    tag = subprocess.run(["git", "ls-remote", "--exit-code", "origin", f"refs/tags/v{new}"],
-                         capture_output=True, text=True)
-    if tag.returncode == 0:
-        raise RuntimeError(f"Version v{new} is already tagged; refusing to reuse it.")
-    if tag.returncode != 2:
-        raise RuntimeError(f"Could not inspect remote version tags: {tag.stderr.strip()}")
+    require_unused_tag(new)
 
     for filename, pattern in FIELDS:
         path = pathlib.Path(filename)

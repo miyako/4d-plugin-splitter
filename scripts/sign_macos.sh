@@ -1,5 +1,5 @@
 #!/bin/bash
-# Manual CI-only signing of a previously verified native build, never a rebuild.
+# CI-only signing after the manual Build pipeline's native checks, never a rebuild.
 set +x
 set -euo pipefail
 umask 077
@@ -35,33 +35,7 @@ PY
 }
 
 validate_run() {
-    python3 - <<'PY'
-import json
-import os
-import pathlib
-import re
-
-evidence = pathlib.Path(os.environ["EVIDENCE"])
-run = json.loads((evidence / "native-run.json").read_text())
-workflow = json.loads((evidence / "native-workflow.json").read_text())
-run_id = os.environ["SOURCE_RUN_ID"]
-repo = "miyako/4d-plugin-splitter"
-assert re.fullmatch(r"[1-9][0-9]*", run_id), "Invalid run ID"
-assert os.environ["GITHUB_REPOSITORY"] == repo, "Not the canonical repository"
-assert os.environ["GITHUB_REF"] == "refs/heads/main", "Not main"
-assert os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch", "Not a manual signing run"
-assert run["id"] == int(run_id), "Wrong run ID"
-assert run["repository"]["full_name"] == repo, "Wrong repository"
-assert run["head_repository"]["full_name"] == repo, "Fork build"
-assert workflow["path"] == ".github/workflows/native.yml", "Wrong workflow path"
-assert run["workflow_id"] == workflow["id"], "Wrong workflow ID"
-assert run["path"] == workflow["path"], "Wrong run workflow path"
-assert run["event"] in ("push", "workflow_dispatch"), "Untrusted build event"
-assert run["head_branch"] == "main", "Build is not from main"
-assert run["status"] == "completed" and run["conclusion"] == "success", "Build not successful"
-assert run["head_sha"] == os.environ["GITHUB_SHA"], "Build must match trusted workflow SHA"
-print("Trusted successful native.yml run validated at the signing workflow commit.")
-PY
+    python3 scripts/release.py validate-run
 }
 
 prepare() {
@@ -195,11 +169,11 @@ PY
 )"
     if [[ -n "$missing" ]]; then
         while IFS= read -r name; do
-            echo "::warning::Signing skipped: missing $name."
+            echo "::error::Signing cannot proceed: missing $name."
         done <<< "$missing"
-        echo "Signing/notarization SKIPPED: one or more required secrets are missing." \
+        echo "Build cannot publish: one or more required signing secrets are missing." \
             | tee "$EVIDENCE/signing-skipped.txt" >> "$GITHUB_STEP_SUMMARY"
-        return 0
+        return 1
     fi
     [[ -f "$WORK/prepared.json" && -d "$BUNDLE" && ! -e "$PRIVATE" && ! -e "$OUTPUT" ]]
     mkdir -p "$PRIVATE" "$OUTPUT"
@@ -302,12 +276,12 @@ PY
     cleanup
     trap - EXIT INT TERM
     echo "signed=true" >> "$GITHUB_OUTPUT"
-    echo "Developer ID signatures verified; ZIP and DMG notarization Accepted; DMG stapled. Artifacts only." \
+    echo "Developer ID signatures verified; ZIP and DMG notarization Accepted; DMG stapled. Ready for the release job." \
         >> "$GITHUB_STEP_SUMMARY"
 }
 
 [[ "${GITHUB_ACTIONS:-}" == true && "${RUNNER_OS:-}" == macOS ]] || {
-    echo "This script is restricted to the manual macOS GitHub Actions workflow." >&2
+    echo "This script is restricted to the manual Build pipeline's macOS GitHub Actions job." >&2
     exit 1
 }
 case "${1:-}" in

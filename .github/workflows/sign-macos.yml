@@ -1,12 +1,24 @@
-name: Sign and notarize macOS artifacts (manual only)
+name: Sign and notarize macOS artifacts
 
 on:
-  workflow_dispatch:
-    inputs:
-      run_id:
-        description: Successful native.yml run on main at this exact workflow commit
+  workflow_call:
+    outputs:
+      signed:
+        description: Whether signing and notarization succeeded
+        value: ${{ jobs.sign.outputs.signed }}
+    secrets:
+      APPLE_DEVELOPER_ID_CERTIFICATE:
         required: true
-        type: string
+      APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD:
+        required: true
+      KEYCHAIN_PASSWORD:
+        required: true
+      NOTARYTOOL_APPLE_ID:
+        required: true
+      NOTARYTOOL_PASSWORD:
+        required: true
+      NOTARYTOOL_TEAM_ID:
+        required: true
 
 permissions:
   contents: read
@@ -14,9 +26,11 @@ permissions:
 
 jobs:
   sign:
-    if: github.repository == 'miyako/4d-plugin-splitter' && github.ref == 'refs/heads/main'
+    if: github.repository == 'miyako/4d-plugin-splitter' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     timeout-minutes: 60
+    outputs:
+      signed: ${{ steps.signing.outputs.signed }}
     defaults:
       run:
         shell: bash
@@ -25,16 +39,16 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Validate trusted native run before downloading
+      - name: Validate this trusted Build run before downloading
         env:
           GH_TOKEN: ${{ github.token }}
-          SOURCE_RUN_ID: ${{ inputs.run_id }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
         run: |
           [[ "$SOURCE_RUN_ID" =~ ^[1-9][0-9]*$ ]]
           mkdir -p build/macos-signing/evidence
           gh api "repos/miyako/4d-plugin-splitter/actions/runs/$SOURCE_RUN_ID" \
             > build/macos-signing/evidence/native-run.json
-          gh api repos/miyako/4d-plugin-splitter/actions/workflows/native.yml \
+          gh api repos/miyako/4d-plugin-splitter/actions/workflows/build.yml \
             > build/macos-signing/evidence/native-workflow.json
           bash scripts/sign_macos.sh validate-run
       - name: Download only the validated universal artifact
@@ -42,12 +56,9 @@ jobs:
         with:
           name: macos-universal
           path: build/macos-signing/incoming
-          repository: miyako/4d-plugin-splitter
-          run-id: ${{ inputs.run_id }}
-          github-token: ${{ github.token }}
       - name: Verify unsigned package and source provenance without credentials
         run: bash scripts/sign_macos.sh prepare
-      - name: Sign and notarize only when all six secrets are present
+      - name: Sign and notarize (all six secrets required)
         id: signing
         env:
           APPLE_DEVELOPER_ID_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE }}
@@ -60,7 +71,7 @@ jobs:
       - name: Always remove signing credentials
         if: always()
         run: bash scripts/sign_macos.sh cleanup
-      - name: Upload signed deliverables (never publish a release)
+      - name: Upload verified signed deliverables for the release job
         if: success() && steps.signing.outputs.signed == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-release-main
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Require an explicit dispatch from canonical main
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ] || [ "$GITHUB_REF" != refs/heads/main ] || [ "$GITHUB_REPOSITORY" != miyako/4d-plugin-splitter ]; then
+            echo "::error::Build must be dispatched from miyako/4d-plugin-splitter main."
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Validate coordinated version and reject existing release tags
+        id: version
+        run: python3 scripts/release.py version
+
+  native:
+    needs: version
+    uses: ./.github/workflows/native.yml
+
+  sign:
+    needs: native
+    uses: ./.github/workflows/sign-macos.yml
+    permissions:
+      contents: read
+      actions: read
+    secrets:
+      APPLE_DEVELOPER_ID_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE }}
+      APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      NOTARYTOOL_APPLE_ID: ${{ secrets.NOTARYTOOL_APPLE_ID }}
+      NOTARYTOOL_PASSWORD: ${{ secrets.NOTARYTOOL_PASSWORD }}
+      NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
+
+  release:
+    needs: [version, native, sign]
+    if: needs.sign.outputs.signed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: Splitter-macos-signed-${{ github.run_id }}
+          path: build/release
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: windows-x64
+          path: build/release-windows
+      - name: Verify release inputs and publish without replacing tags or assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp build/release-windows/Splitter-windows-x64.zip build/release/
+          python3 scripts/release.py verify
+          git tag "v$VERSION" "$GITHUB_SHA"
+          git push origin "refs/tags/v$VERSION"
+          gh release create "v$VERSION" --verify-tag --target "$GITHUB_SHA" \
+            --title "Splitter v$VERSION" --notes-file build/release-notes.md \
+            build/release/Splitter-macos-signed.dmg \
+            build/release/Splitter-macos-signed.zip \
+            build/release/Splitter-windows-x64.zip \
+            build/release/signing-provenance.json build/release/SHA256SUMS
+          echo "Published Splitter v$VERSION from $GITHUB_SHA." >> "$GITHUB_STEP_SUMMARY"
