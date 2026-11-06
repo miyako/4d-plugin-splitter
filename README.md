@@ -21,8 +21,9 @@ are universal arm64/x86_64, Developer ID signed and notarized; the DMG is
 stapled, the ZIP is not.
 [`Splitter-windows-x64.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-windows-x64.zip)
 is unsigned. This release was manually published after the build/signing
-workflows; normal build packages remain unsigned and workflow outputs alone
-are Actions artifacts, not published releases. Verify signed downloads using
+workflows. Ordinary push/PR builds remain unsigned Actions artifacts; the manual
+**Build** workflow now signs and publishes new releases after verification.
+Verify signed downloads using
 the release's external `signing-provenance.json`, `SHA256SUMS` and macOS
 signature. The internal `build-manifest.json` intentionally describes unsigned
 input provenance; unsigned-only `scripts/unpack.py` rejects the signed ZIP.
@@ -259,7 +260,8 @@ compiled behavior on pinned 20.7. Dependency caches contain checksum-verified so
 compiled libraries or credentials. Build/signing Actions use immutable revisions
 and read-only permissions; normal builds never receive signing secrets.
 Builds run on pull requests and main pushes without duplicate feature-push jobs.
-No workflow publishes releases or tags. Generated packages, host installations
+Only the separate, manually dispatched **Build** pipeline can sign and publish
+releases; push/PR checks cannot. Generated packages, host installations
 and ongoing CI evidence stay in ignored `build/`/`dist/` or Actions artifacts.
 The small checked-in JSON reports retain their original historical provenance.
 
@@ -276,25 +278,36 @@ It uses only `GITHUB_TOKEN` with `contents: write`; repository/branch rules must
 allow that bot push. No PAT or additional secret is required.
 
 The bump creates **no tag, build or release**. A `GITHUB_TOKEN` push does not
-trigger the main-push build: separately dispatch **Native build and real host
-checks** ([`native.yml`](.github/workflows/native.yml)) from main at the new
-commit. After all checks succeed, optionally dispatch the signing workflow at
-that same commit using the successful native run ID below. Unlike
-[`miyako/4d-plugin-get-icon#9`](https://github.com/miyako/4d-plugin-get-icon/pull/9),
-Splitter has no **Build and Release** workflow: artifacts remain Actions
-artifacts, and maintainers create the version tag and publish the release
-manually only after build/signing verification. A stale bump dispatch whose
-push is rejected must be rerun from current main.
+trigger the main-push build: separately dispatch **Build**
+([`build.yml`](.github/workflows/build.yml)) from main at the new commit.
+That single run handles all builds, tests, signing/notarization and release
+publication. No run ID needs to be copied and no second signing dispatch is
+required. A stale bump dispatch whose push is rejected must be rerun from
+current main.
 
-### Optional signing and notarization
+### Build, sign and release
 
-Manually dispatch [`sign-macos.yml`](.github/workflows/sign-macos.yml) with a
-successful `native.yml` run ID at the **same main commit**. It accepts only
-trusted canonical-repository main builds, verifies unsigned input provenance,
-and visibly skips signing when credentials are missing. Signed ZIP/DMG,
-external signing provenance and logs are workflow outputs in Actions artifacts,
-not automatic release publications. The DMG is
-stapled; the ZIP is not. The unchanged internal build manifest describes the
+After bumping, open Actions → **Build** → **Run workflow**, select **main**, and
+run it once. It rejects versions whose tag already exists, builds/tests both
+platforms using reusable [`native.yml`](.github/workflows/native.yml), then calls
+[`sign-macos.yml`](.github/workflows/sign-macos.yml) only after **all native and
+real-host checks succeed**. Both use the same dispatch commit and run. Native
+jobs have read-only permissions and no signing secrets. Signing receives only
+the six existing signing secrets; missing credentials or failed signing or
+notarization fail the run and prevent publication.
+
+The final isolated job verifies package hashes, source/run provenance and
+accepted notarizations, then creates `vX.Y.Z` at the dispatch commit and publishes
+a GitHub release containing the signed macOS ZIP/DMG, unsigned Windows x64 ZIP,
+external `signing-provenance.json` and `SHA256SUMS`. Only that job receives
+`contents: write`. It uses `GITHUB_TOKEN` directly, not a PAT or a tag-triggered
+workflow; repository tag rules must allow creation of the version tag.
+Tags and releases are never replaced. If tag creation succeeds but publication
+fails, finish that release manually after inspecting the failed run; rerunning
+Build deliberately rejects the existing tag.
+
+Signing outputs and diagnostic logs remain available as Actions artifacts.
+The DMG is stapled; the ZIP is not. The unchanged internal build manifest describes the
 unsigned input; signed ZIPs intentionally fail unsigned-only `unpack.py`
 verification and must instead be checked against their external signing
 provenance and macOS signature.
@@ -302,8 +315,8 @@ provenance and macOS signature.
 Required repository secret names: `APPLE_DEVELOPER_ID_CERTIFICATE`,
 `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD`, `KEYCHAIN_PASSWORD`,
 `NOTARYTOOL_APPLE_ID`, `NOTARYTOOL_PASSWORD`, `NOTARYTOOL_TEAM_ID`.
-Only the user runs their local secret-setup helper. Build/test CI does not
-depend on these secrets. Signing/notarization requires an actual credentialed
+Only the user runs their local secret-setup helper. Ordinary push/PR build/test
+CI does not depend on these secrets. Signing/notarization requires an actual credentialed
 run to succeed; the [v0.1.0 signing run](https://github.com/miyako/4d-plugin-splitter/actions/runs/42151065472)
 succeeded with both notarizations Accepted before manual publication.
 

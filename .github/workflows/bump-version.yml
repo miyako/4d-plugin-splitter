@@ -49,7 +49,6 @@ jobs:
         run: |
           {
             echo "### Bumped version to $VERSION"
-            echo "Manually run **Native build and real host checks** from **main** at the new commit."
-            echo "After it succeeds, optionally run **Sign and notarize macOS artifacts (manual only)** at that same commit with its native run ID."
-            echo "These workflows produce Actions artifacts only. Tag creation and release publication remain manual after verification."
+            echo "Manually run **Build** from **main** at the new commit."
+            echo "Build runs native checks, signs/notarizes macOS, then tags and publishes the release only after verification succeeds."
           } >> "$GITHUB_STEP_SUMMARY"
