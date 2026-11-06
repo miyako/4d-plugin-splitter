@@ -1,0 +1,170 @@
+{
+  "status": "blocked",
+  "host": "20.7 build 20.101905",
+  "host_binary_sha256": "4ef62a5e1dba7392d2e4bb406afa032be638a647aee991dbfaf75b107939b8af",
+  "platform": "macos-arm64",
+  "plugin_sha256": "80bdbbc002518778f4855b0673f72299d1d309213a6c17e06deed625ce8a3f8a",
+  "source_sha256": {
+    "CMakeLists.txt": "98eeb5643589b725b52c9e489d05b783a77293b2cca209f04e61015b25f0884d",
+    "dependencies.lock.json": "713771dfe042925e8ca28a6e3f4d17997fadb7194fa537eb823f5301a11671d4",
+    "src/plugin/probe.cpp": "bf045ff39a38c8f25106fb318541379ea8f824fcb53ab7718a5c166d7cd33c6d",
+    "resources/manifest.json": "a6b9688693a0c05b7b3cce45629580528be9b1e40454ab0c915d02b5d7b7d932",
+    "scripts/check_host.py": "b40e35c3ebd262de4c93409d8daef5138e21fba1db417613aeba2a1e50871bdb",
+    "cmake/Info.plist": "d4aaf2e74b3905c2ef32606f9c36d73490cbdbeefe8d698f01d6a86d4ae474a5",
+    "tests/host/Project/Sources/Methods/probe_compile.4dm": "3afae76bb1e24b825db2acb636348562a55399b4f1ef87ac2c50ad44db533df4",
+    "tests/host/Project/Sources/Methods/probe_contract.4dm": "69b5d5e67b1602d7d3adaed7cf90ff377e0860e6108ab43667a11d120f8145fa",
+    "tests/host/Project/Sources/Methods/probe_error.4dm": "3369da4213eea3a86951c6c77362bb1f0ecbeaeedc34295aca74e6965afe6fba",
+    "tests/host/Project/Sources/Methods/probe_error_handler.4dm": "49521296ed8bdf69a9bcc414c93eb2fc718505afb4af0d2387558331c151f8ee",
+    "tests/host/Project/SplitterTests.4DProject": "1f7f65c5148038da9b14ae9dce7d0da4858b3144c7faefeb1b5abc949851cf9b",
+    "tests/negative/probe_omitted.4dm": "32180f050fa407b11e6fddf88dfdc253bccb2d3d6f793c367afa93d656fdc617"
+  },
+  "source": {
+    "compiled": false,
+    "passed": 1248,
+    "failed": 0,
+    "astralLength": 2,
+    "combiningLength": 2,
+    "kindsLiteral": [
+      33,
+      1
+    ],
+    "kindsInteger": [
+      33,
+      9
+    ],
+    "kindsReal": [
+      33,
+      1
+    ],
+    "kindsStructured": [
+      42,
+      38
+    ],
+    "kindsNull": [
+      -1,
+      -1
+    ],
+    "empty": [],
+    "whitespace": []
+  },
+  "compiled": {
+    "compiled": true,
+    "passed": 1248,
+    "failed": 0,
+    "astralLength": 2,
+    "combiningLength": 2,
+    "kindsLiteral": [
+      33,
+      9
+    ],
+    "kindsInteger": [
+      33,
+      9
+    ],
+    "kindsReal": [
+      33,
+      1
+    ],
+    "kindsStructured": [
+      42,
+      38
+    ],
+    "kindsNull": [
+      -1,
+      -1
+    ],
+    "empty": [],
+    "whitespace": []
+  },
+  "source_execution": {
+    "stdout": "SPLITTER_CONTRACT={\"compiled\":false,\"passed\":1248,\"failed\":0,\"astralLength\":2,\"combiningLength\":2,\"kindsLiteral\":[33,1],\"kindsInteger\":[33,9],\"kindsReal\":[33,1],\"kindsStructured\":[42,38],\"kindsNull\":[-1,-1],\"empty\":[],\"whitespace\":[]}",
+    "stderr": ""
+  },
+  "compiled_execution": {
+    "stdout": "SPLITTER_CONTRACT={\"compiled\":true,\"passed\":1248,\"failed\":0,\"astralLength\":2,\"combiningLength\":2,\"kindsLiteral\":[33,9],\"kindsInteger\":[33,9],\"kindsReal\":[33,1],\"kindsStructured\":[42,38],\"kindsNull\":[-1,-1],\"empty\":[],\"whitespace\":[]}",
+    "stderr": ""
+  },
+  "compilation": {
+    "stdout": "SPLITTER_COMPILE={\"success\":true,\"errors\":[{\"message\":\"Missing parameter in the plug-in procedure call. (533.4)\",\"isError\":false,\"code\":{\"type\":\"projectMethod\",\"methodName\":\"probe_contract\",\"path\":\"probe_contract\",\"file\":\"[object File]\"},\"line\":18,\"lineInFile\":19},{\"message\":\"Missing parameter in the plug-in procedure call. (533.4)\",\"isError\":false,\"code\":{\"type\":\"projectMethod\",\"methodName\":\"probe_contract\",\"path\":\"probe_contract\",\"file\":\"[object File]\"},\"line\":38,\"lineInFile\":39},{\"message\":\"Missing parameter in the plug-in procedure call. (533.4)\",\"isError\":false,\"code\":{\"type\":\"projectMethod\",\"methodName\":\"probe_contract\",\"path\":\"probe_contract\",\"file\":\"[object File]\"},\"line\":47,\"lineInFile\":48}]}",
+    "stderr": ""
+  },
+  "omitted_interpreted": {
+    "stdout": "SPLITTER_OMITTED_INTERPRETED_OK",
+    "stderr": ""
+  },
+  "omitted_compilation": {
+    "success": false,
+    "errors": [
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "probe_contract",
+          "path": "probe_contract",
+          "file": "[object File]"
+        },
+        "line": 18,
+        "lineInFile": 19
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "probe_contract",
+          "path": "probe_contract",
+          "file": "[object File]"
+        },
+        "line": 38,
+        "lineInFile": 39
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "probe_contract",
+          "path": "probe_contract",
+          "file": "[object File]"
+        },
+        "line": 47,
+        "lineInFile": 48
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "probe_omitted",
+          "path": "probe_omitted",
+          "file": "[object File]"
+        },
+        "line": 2,
+        "lineInFile": 3
+      },
+      {
+        "message": "Not enough parameters were passed to this plug-in command.",
+        "isError": true,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "probe_omitted",
+          "path": "probe_omitted",
+          "file": "[object File]"
+        },
+        "line": 2,
+        "lineInFile": 3
+      }
+    ]
+  },
+  "throw_probe": {
+    "stdout": "SPLITTER_ERROR_RETURNED",
+    "stderr": "SPLITTER_THROW status=33\ntool4d.4DRT [33] Unimplemented command or function. (task=-1, taskName=Main task)\n"
+  },
+  "historical_findings": [
+    "The historical Variant-third manifest rejects omission; the selected Longint/Object signature resolves this."
+  ],
+  "blockers": [
+    "Command 1805 (throw) is unavailable in 20.7; the error-signaling contract remains unresolved."
+  ]
+}

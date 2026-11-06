@@ -1,0 +1,11 @@
+/build/
+/dist/
+/tests/host/Plugins/
+/tests/host/Data/
+/tests/host/Logs/
+/tests/host/Project/DerivedData/
+/tests/host/Project/userPreferences.*
+/tests/host/userPreferences.*/
+/tests/host/Project/Sources/catalog.4DCatalog
+.DS_Store
+__pycache__/

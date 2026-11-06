@@ -1,0 +1,4 @@
+{
+  "$comment": "Isolated source and compiled tests of the shipped Splitter API",
+  "compatibilityVersion": 2000
+}

@@ -1,0 +1,191 @@
+{
+  "host": "20.7 build 20.101905",
+  "platform": "macos-arm64",
+  "cases": {
+    "vv": {
+      "syntax": "Splitter_probe(&T;&V;&V):C",
+      "source": {
+        "compiled": false,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":false,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": ""
+      },
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          },
+          {
+            "message": "Not enough parameters were passed to this plug-in command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    },
+    "vl": {
+      "syntax": "Splitter_probe_vl(&T;&V;&L):C",
+      "source": {
+        "compiled": false,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":false,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": "SPLITTER_LONG_OPTIONS=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":true,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": "SPLITTER_LONG_OPTIONS=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "tl": {
+      "syntax": "Splitter_probe_tl(&T;&T;&L):C",
+      "source": {
+        "compiled": false,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":false,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": "SPLITTER_LONG_OPTIONS=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compilation": {
+        "success": true,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          }
+        ]
+      },
+      "compiled": {
+        "compiled": true,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "compiled_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":true,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": "SPLITTER_LONG_OPTIONS=0\nSPLITTER_LONG_OPTIONS=0\n"
+      },
+      "compiled_execution_status": "passed",
+      "compiled_libraries": [
+        "Libraries/lib4d-arm64.dylib"
+      ]
+    },
+    "tv": {
+      "syntax": "Splitter_probe_tv(&T;&T;&V):C",
+      "source": {
+        "compiled": false,
+        "explicitEqual": 1,
+        "omittedEqual": 1
+      },
+      "source_execution": {
+        "stdout": "SPLITTER_MATRIX={\"compiled\":false,\"explicitEqual\":1,\"omittedEqual\":1}",
+        "stderr": ""
+      },
+      "compilation": {
+        "success": false,
+        "errors": [
+          {
+            "message": "Missing parameter in the plug-in procedure call. (533.4)",
+            "isError": false,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          },
+          {
+            "message": "Not enough parameters were passed to this plug-in command.",
+            "isError": true,
+            "code": {
+              "type": "projectMethod",
+              "methodName": "probe_matrix",
+              "path": "probe_matrix",
+              "file": "[object File]"
+            },
+            "line": 5,
+            "lineInFile": 6
+          }
+        ]
+      },
+      "compiled": null,
+      "compiled_execution": null,
+      "compiled_execution_status": "not_run",
+      "compiled_libraries": []
+    }
+  },
+  "source_sha256": {
+    "src/plugin/probe.cpp": "bf045ff39a38c8f25106fb318541379ea8f824fcb53ab7718a5c166d7cd33c6d",
+    "resources/manifest.json": "a6b9688693a0c05b7b3cce45629580528be9b1e40454ab0c915d02b5d7b7d932",
+    "scripts/check_omission.py": "8d54555b0da57a98b469c2f697e1925672c1255c172fe2e2ca474e82a47f8756",
+    "scripts/check_host.py": "b40e35c3ebd262de4c93409d8daef5138e21fba1db417613aeba2a1e50871bdb",
+    "tests/matrix/tl.4dm": "11e46dcc907e2ee967a35144c9e27e39eb575bc58124718305808e3a9cd8a43b",
+    "tests/matrix/tv.4dm": "afec0be264e057587b7d2f15e84c00d7dbb54593410cc493fe70904ba744abbc",
+    "tests/matrix/vl.4dm": "cfe09caee976c4bc3501f6ae62f63eb34fba17cf128b6c531796335cd8bccde2",
+    "tests/matrix/vv.4dm": "4876d68574d1311b4be0973080c270eb831493717542d462c6008d77d72d7c63"
+  },
+  "plugin_sha256": "80bdbbc002518778f4855b0673f72299d1d309213a6c17e06deed625ce8a3f8a"
+}

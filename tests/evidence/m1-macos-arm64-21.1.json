@@ -1,0 +1,117 @@
+{
+  "status": "passed",
+  "host": "21.1 build 21.100468",
+  "hostBinarySha256": "340610abccce1d3be1e6dd71f8033b244402d3c57e6fab86103498e72d94a645",
+  "osVersion": "26.7",
+  "platform": "Darwin-arm64",
+  "hostArchitecture": "arm64",
+  "execution": "native",
+  "source": {
+    "compiled": false,
+    "passed": 1294,
+    "failures": [],
+    "nativeCases": 1248,
+    "extendedCases": 46
+  },
+  "compiled": {
+    "compiled": true,
+    "passed": 1294,
+    "failures": [],
+    "nativeCases": 1248,
+    "extendedCases": 46
+  },
+  "compilation": {
+    "success": true,
+    "errors": [
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "test_missing_data",
+          "path": "test_missing_data",
+          "file": "[object File]"
+        },
+        "line": 3,
+        "lineInFile": 4
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "test_all",
+          "path": "test_all",
+          "file": "[object File]"
+        },
+        "line": 20,
+        "lineInFile": 21
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "test_all",
+          "path": "test_all",
+          "file": "[object File]"
+        },
+        "line": 39,
+        "lineInFile": 40
+      },
+      {
+        "message": "Missing parameter in the plug-in procedure call. (533.4)",
+        "isError": false,
+        "code": {
+          "type": "projectMethod",
+          "methodName": "test_all",
+          "path": "test_all",
+          "file": "[object File]"
+        },
+        "line": 133,
+        "lineInFile": 134
+      }
+    ]
+  },
+  "source_execution": {
+    "stdout": "SPLITTER_M1={\"compiled\":false,\"passed\":1294,\"failures\":[],\"nativeCases\":1248,\"extendedCases\":46}",
+    "stderr": ""
+  },
+  "compiled_execution": {
+    "stdout": "SPLITTER_M1={\"compiled\":true,\"passed\":1294,\"failures\":[],\"nativeCases\":1248,\"extendedCases\":46}",
+    "stderr": ""
+  },
+  "missing_data": {
+    "stdout": "SPLITTER_MISSING={\"nativeWorks\":true,\"regexIsNull\":true,\"graphemesIsNull\":true}",
+    "stderr": "Splitter: native operation failed.\nSplitter: native operation failed.\n"
+  },
+  "truncated_data": {
+    "stdout": "SPLITTER_MISSING={\"nativeWorks\":true,\"regexIsNull\":true,\"graphemesIsNull\":true}",
+    "stderr": "Splitter: native operation failed.\nSplitter: native operation failed.\n"
+  },
+  "package_sha256": {
+    "Contents/Info.plist": "8cb60d47bea6065dc42ef02e8393aed14582465572d840db990fa3082df079ce",
+    "Contents/MacOS/Splitter": "bb45162a5a640f9048bdbe2f885c2dfa673df52f22698d14df366c9cb57ad69a",
+    "Contents/Resources/build-manifest.json": "e5c19692da0d36afd53164e52b23a81ff5e3b3c6c61927e2eaafc10c1a693f06",
+    "Contents/Resources/dependencies.lock.json": "4b0ac888e4d73ea88424e939870774867bf7f17f1bd2bb5275f3a7a7745c19fa",
+    "Contents/Resources/icudt79l.dat": "208a8392975e81a351fd9e3759f7a2c7a5659c97ef258c7a7435e2d9c31a61ce",
+    "Contents/Resources/licenses/4D-Plugin-SDK.txt": "88eb8497b0702a719f2f9524ca46245308b39cccb5f65d84b0887674755d12f9",
+    "Contents/Resources/licenses/ICU-LICENSE.txt": "e09827667e0bb3c808b2a463548ba814a5e6249b67353234d70c8dfc2bcc417d",
+    "Contents/Resources/manifest.json": "ce5df2a9279e7fff3fd439680500e0c89b42f25d77eff4cf6313c3e9a507110e"
+  },
+  "source_sha256": {
+    "src/core/icu_runtime.cpp": "06b76b8489d847fb458d1aaeef022ddd29b0910a1a0fade5261a2a76a2028c3e",
+    "src/core/split.cpp": "764ec75a89777fc32fb5a4b28031c8faf5ba0794bfe6d48174b72644529e314c",
+    "src/plugin/probe.cpp": "bf045ff39a38c8f25106fb318541379ea8f824fcb53ab7718a5c166d7cd33c6d",
+    "src/plugin/splitter.cpp": "aa1ac1c10a14a4310cf6866261d0436816dd475521c78a42bdc325bef0bdbc48",
+    "src/core/icu_runtime.hpp": "f9a717a8bc38a91796eb093b54bc62d7786128e3eda05972118f256389ec74b3",
+    "src/core/split.hpp": "08db170446324d9bf80e7f33dfbe5df53ea2a16b7ec14292de51769447d915e0",
+    "tests/m1/Project/Sources/Methods/check_collection.4dm": "10720a90c794ad14774b786ac5009d4f810b7268fc38e43685b49e68b1e60c62",
+    "tests/m1/Project/Sources/Methods/test_all.4dm": "4af2977114a7b431a4d3a89d8ec78747f6d238e88feeaee6e13390840c21e559",
+    "tests/m1/Project/Sources/Methods/test_missing_data.4dm": "28eb42ece9b6240eafae79b1446ad61828a4c9c76987ebfe4553d33828c271fc",
+    "tests/m1/Project/SplitterTests.4DProject": "83630a1bc15049a3e3bce5cfb10bca93df960007bdc569b58a5cfa8013ed89d1",
+    "tests/m1/probe_compile.4dm.in": "71bb78ea686155a8d2796125e7cfc3fdfcba29512abefef9dc0b5ce256ddd604",
+    "resources/manifest.json": "ce5df2a9279e7fff3fd439680500e0c89b42f25d77eff4cf6313c3e9a507110e"
+  },
+  "threadSafe": false
+}

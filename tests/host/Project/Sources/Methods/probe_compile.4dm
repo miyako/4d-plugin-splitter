@@ -1,0 +1,4 @@
+//%attributes = {"invisible":true}
+var $result : Object
+$result:=Compile project({targets: New collection("arm64_macOS_lib"); typeInference: "all"})
+LOG EVENT:C667(Into system standard outputs:K38:9; "SPLITTER_COMPILE="+JSON Stringify:C1217($result); Information message:K38:1)
