@@ -83,7 +83,7 @@ assert manifest["signed"] is False and manifest["published"] is False
 assert manifest["configuration"] == "Release"
 assert manifest["architectures"] == ["arm64", "x86_64"]
 inputs = {
-    root / "CMakeLists.txt", root / "dependencies.lock.json", root / "src/plugin/splitter.cpp",
+    root / "CMakeLists.txt", root / "LICENSE", root / "dependencies.lock.json", root / "src/plugin/splitter.cpp",
     *root.glob("src/core/*.cpp"), *root.glob("src/core/*.hpp"),
     *root.glob("cmake/*"), *root.glob("resources/*"), *root.glob("licenses/*"),
 }
@@ -98,6 +98,7 @@ for source, target in (
     (root / "dependencies.lock.json", resources / "dependencies.lock.json"),
     (root / "cmake/Info.plist", bundle / "Contents/Info.plist"),
     (root / "licenses/4D-Plugin-SDK.txt", resources / "licenses/4D-Plugin-SDK.txt"),
+    (root / "LICENSE", resources / "licenses/Splitter-MIT.txt"),
 ):
     assert sha(source) == sha(target), f"Unexpected resource: {target.name}"
 assert (resources / "licenses/ICU-LICENSE.txt").is_file()

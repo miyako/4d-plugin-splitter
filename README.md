@@ -5,6 +5,10 @@ M1 implements native-compatible literal splitting, literal separator lists,
 bounded ICU regular-expression splitting, and opt-in extended grapheme clusters.
 CSV/TSV and the remaining toolkit are follow-on milestones, **not implemented APIs**.
 
+Splitter is [MIT licensed](LICENSE). Distributed bundles include the project
+license together with the complete ICU/data and 4D Plug-in SDK notices under
+`Contents/Resources/licenses/`.
+
 ## Installation
 
 Quit the host, extract the appropriate package, copy **the entire

@@ -77,6 +77,9 @@ function(splitter_bundle target source manifest output_directory)
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${CMAKE_CURRENT_SOURCE_DIR}/licenses/4D-Plugin-SDK.txt"
             "${contents}/Resources/licenses/4D-Plugin-SDK.txt"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+            "${contents}/Resources/licenses/Splitter-MIT.txt"
     )
 endfunction()
 

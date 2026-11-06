@@ -42,6 +42,7 @@ def main():
         (ROOT / "dependencies.lock.json", resources / "dependencies.lock.json"),
         (ROOT / "cmake/Info.plist", bundle / "Contents/Info.plist"),
         (ROOT / "licenses/4D-Plugin-SDK.txt", resources / "licenses/4D-Plugin-SDK.txt"),
+        (ROOT / "LICENSE", resources / "licenses/Splitter-MIT.txt"),
     ):
         shutil.copyfile(source, target)
     manifest = json.loads((resources / "manifest.json").read_text(encoding="utf-8"))
@@ -88,6 +89,7 @@ def main():
         raise RuntimeError("Packaging requires a native macOS or Windows builder")
     inputs = {
         ROOT / "CMakeLists.txt",
+        ROOT / "LICENSE",
         ROOT / "dependencies.lock.json",
         ROOT / "src/plugin/splitter.cpp",
         *ROOT.glob("src/core/*.cpp"),
