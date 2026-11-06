@@ -100,7 +100,7 @@ def main():
     }
     provenance = {
         "repository": "miyako/4d-plugin-splitter",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "configuration": args.configuration,
         "architectures": sorted(arches),
         "gitRevision": output("git", "-C", str(ROOT), "rev-parse", "HEAD").strip(),
