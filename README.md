@@ -256,12 +256,35 @@ It also builds/tests independently with the native Intel toolchain. A separate
 macOS 26 arm64 job checks the same package in eight actual compiled preemptive
 processes on pinned 21.1; all three build platforms check interpreted and
 compiled behavior on pinned 20.7. Dependency caches contain checksum-verified source/host archives, not
-compiled libraries or credentials. Actions use immutable revisions and
-read-only permissions; normal builds never receive signing secrets.
+compiled libraries or credentials. Build/signing Actions use immutable revisions
+and read-only permissions; normal builds never receive signing secrets.
 Builds run on pull requests and main pushes without duplicate feature-push jobs.
 No workflow publishes releases or tags. Generated packages, host installations
 and ongoing CI evidence stay in ignored `build/`/`dist/` or Actions artifacts.
 The small checked-in JSON reports retain their original historical provenance.
+
+### Preparing a version
+
+Manually run **Bump version** ([`bump-version.yml`](.github/workflows/bump-version.yml))
+from **main**, choosing `patch` (default), `minor` or `major`. It validates the
+strict `X.Y.Z` version in `CMakeLists.txt` and requires both bundle version fields
+in `cmake/Info.plist` and the package provenance version in `scripts/package.py`
+to match. All four fields are updated together; published download links and
+historical evidence are not changed. The workflow rejects an already-tagged
+target `vX.Y.Z`, serializes bump runs, and commits/pushes to main without force.
+It uses only `GITHUB_TOKEN` with `contents: write`; repository/branch rules must
+allow that bot push. No PAT or additional secret is required.
+
+The bump creates **no tag, build or release**. A `GITHUB_TOKEN` push does not
+trigger the main-push build: separately dispatch **Native build and real host
+checks** ([`native.yml`](.github/workflows/native.yml)) from main at the new
+commit. After all checks succeed, optionally dispatch the signing workflow at
+that same commit using the successful native run ID below. Unlike
+[`miyako/4d-plugin-get-icon#9`](https://github.com/miyako/4d-plugin-get-icon/pull/9),
+Splitter has no **Build and Release** workflow: artifacts remain Actions
+artifacts, and maintainers create the version tag and publish the release
+manually only after build/signing verification. A stale bump dispatch whose
+push is rejected must be rerun from current main.
 
 ### Optional signing and notarization
 
