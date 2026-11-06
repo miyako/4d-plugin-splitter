@@ -1,7 +1,10 @@
 # Splitter
 
+[English](README.md) | [日本語](README.ja.md)
+
 Native 4D text toolkit in [`miyako/4d-plugin-splitter`](https://github.com/miyako/4d-plugin-splitter).
-M1 implements native-compatible literal splitting, literal separator lists,
+M1 (the first implementation milestone, not Apple M1) implements
+native-compatible literal splitting, literal separator lists,
 bounded ICU regular-expression splitting, and opt-in extended grapheme clusters.
 CSV/TSV and the remaining toolkit are follow-on milestones, **not implemented APIs**.
 
@@ -11,7 +14,20 @@ license together with the complete ICU/data and 4D Plug-in SDK notices under
 
 ## Installation
 
-Quit the host, extract the appropriate package, copy **the entire
+Published downloads are available in [v0.1.0](https://github.com/miyako/4d-plugin-splitter/releases/tag/v0.1.0):
+[`Splitter-macos-signed.dmg`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.dmg)
+and [`Splitter-macos-signed.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.zip)
+are universal arm64/x86_64, Developer ID signed and notarized; the DMG is
+stapled, the ZIP is not.
+[`Splitter-windows-x64.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-windows-x64.zip)
+is unsigned. This release was manually published after the build/signing
+workflows; normal build packages remain unsigned and workflow outputs alone
+are Actions artifacts, not published releases. Verify signed downloads using
+the release's external `signing-provenance.json`, `SHA256SUMS` and macOS
+signature. The internal `build-manifest.json` intentionally describes unsigned
+input provenance; unsigned-only `scripts/unpack.py` rejects the signed ZIP.
+
+Quit the host, extract or open the appropriate package, copy **the entire
 `Splitter.bundle`** into the host project's `Plugins/` folder, and restart:
 
 ```text
@@ -219,7 +235,8 @@ The packager rebuilds, checks architecture, external dependencies, exports,
 matching data and notices, and records source/binary hashes plus toolchain
 provenance. ZIP extraction verifies paths, permissions and file hashes.
 Normal build packages are unsigned. They are local files or Actions artifacts,
-not published releases.
+not automatically published releases; the manually published v0.1.0 downloads
+are described under [Installation](#installation).
 
 `scripts/fetch_host.py` restores a public host into a **new isolated directory**,
 verifying both archive SHA-256 and host version against
@@ -252,7 +269,8 @@ Manually dispatch [`sign-macos.yml`](.github/workflows/sign-macos.yml) with a
 successful `native.yml` run ID at the **same main commit**. It accepts only
 trusted canonical-repository main builds, verifies unsigned input provenance,
 and visibly skips signing when credentials are missing. Signed ZIP/DMG,
-external signing provenance and logs are Actions artifacts only. The DMG is
+external signing provenance and logs are workflow outputs in Actions artifacts,
+not automatic release publications. The DMG is
 stapled; the ZIP is not. The unchanged internal build manifest describes the
 unsigned input; signed ZIPs intentionally fail unsigned-only `unpack.py`
 verification and must instead be checked against their external signing
@@ -262,14 +280,17 @@ Required repository secret names: `APPLE_DEVELOPER_ID_CERTIFICATE`,
 `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD`, `KEYCHAIN_PASSWORD`,
 `NOTARYTOOL_APPLE_ID`, `NOTARYTOOL_PASSWORD`, `NOTARYTOOL_TEAM_ID`.
 Only the user runs their local secret-setup helper. Build/test CI does not
-depend on these secrets. Signing/notarization is not claimed until an actual
-credentialed run succeeds.
+depend on these secrets. Signing/notarization requires an actual credentialed
+run to succeed; the [v0.1.0 signing run](https://github.com/miyako/4d-plugin-splitter/actions/runs/42151065472)
+succeeded with both notarizations Accepted before manual publication.
 
 ### Evidence and support boundaries
 
 Compatibility targets: **4D 20.7 LTS onward**, macOS universal arm64/x86_64 and
 Windows x64. macOS binaries target 12.0 or later. These are not blanket claims
-for every later 4D or OS release.
+for every later 4D or OS release. The macOS 12.0 minimum runtime and GUI
+workflows were not tested. The table below preserves historical local runs,
+not the later release validation summarized in [v0.1.0](https://github.com/miyako/4d-plugin-splitter/releases/tag/v0.1.0).
 
 | Observed host on macOS 26.7 | Execution | Source / compiled |
 | --- | --- | --- |
