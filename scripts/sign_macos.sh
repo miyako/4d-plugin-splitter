@@ -17,6 +17,14 @@ export ROOT WORK EVIDENCE OUTPUT BUNDLE
 
 cleanup() {
     # Never touch the login keychain or remove unrelated runner files.
+    if [[ -f "$PRIVATE/original-keychains.txt" ]]; then
+        python3 - "$PRIVATE/original-keychains.txt" <<'PY'
+import pathlib, shlex, subprocess, sys
+keychains = shlex.split(pathlib.Path(sys.argv[1]).read_text())
+subprocess.run(["security", "list-keychains", "-d", "user", "-s", *keychains], check=True)
+PY
+        rm -f -- "$PRIVATE/original-keychains.txt"
+    fi
     if [[ -f "$KEYCHAIN" ]]; then
         security delete-keychain "$KEYCHAIN" || return 1
     fi
@@ -199,24 +207,37 @@ PY
     trap 'exit 130' INT
     trap 'exit 143' TERM
     printf '%s' "$APPLE_DEVELOPER_ID_CERTIFICATE" | /usr/bin/base64 --decode > "$CERTIFICATE"
+    echo "Preparing isolated signing keychain."
+    security list-keychains -d user > "$PRIVATE/original-keychains.txt"
     security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
     security set-keychain-settings -lut 3600 "$KEYCHAIN"
     security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+    python3 - "$PRIVATE/original-keychains.txt" "$KEYCHAIN" <<'PY'
+import pathlib, shlex, subprocess, sys
+keychains = shlex.split(pathlib.Path(sys.argv[1]).read_text())
+subprocess.run(["security", "list-keychains", "-d", "user", "-s", sys.argv[2], *keychains],
+               check=True)
+PY
+    echo "Importing Developer ID certificate."
     security import "$CERTIFICATE" -P "$APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD" \
         -t cert -f pkcs12 -k "$KEYCHAIN" -T /usr/bin/codesign -T /usr/bin/security
     rm -f -- "$CERTIFICATE"
+    echo "Allowing codesign access to the private key."
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s \
         -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+    echo "Resolving Developer ID identity."
     identity="$(security find-identity -v -p codesigning "$KEYCHAIN" \
         | sed -nE 's/.* ([0-9A-F]{40}) "Developer ID Application:.*".*/\1/p')"
     [[ "$identity" =~ ^[0-9A-F]{40}$ ]] || {
         echo "::error::Expected exactly one valid Developer ID Application identity."
         return 1
     }
+    echo "Storing notarization credentials."
     xcrun notarytool store-credentials splitter-notary --keychain "$KEYCHAIN" \
         --apple-id "$NOTARYTOOL_APPLE_ID" --password "$NOTARYTOOL_PASSWORD" \
         --team-id "$NOTARYTOOL_TEAM_ID" > /dev/null
     # Preserve the original manifest as unsigned-build provenance, then seal it unchanged.
+    echo "Signing universal plug-in."
     codesign --force --timestamp --options runtime --keychain "$KEYCHAIN" \
         --sign "$identity" "$BUNDLE"
     codesign --verify --deep --strict --verbose=2 "$BUNDLE" \
