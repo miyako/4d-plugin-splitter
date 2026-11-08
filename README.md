@@ -170,10 +170,13 @@ Pinned ICU character boundaries implement extended grapheme clusters: surrogate
 pairs, decomposed accents, ZWJ emoji, skin tones, regional-indicator flags and
 CRLF sequences remain together. Empty input yields an empty Collection.
 No normalization is performed; results are original substrings.
-Native trim is applied per field, then ignore-empty filtering, only if requested.
+In this mode, `sk trim spaces` trims Unicode `White_Space` characters (the same
+set as ICU regex `\s`) per field, including tabs, line breaks, non-breaking spaces
+and ideographic spaces. Trimmed whitespace-only fields become empty strings;
+add `sk ignore empty strings` to remove them. Neither flag changes the input.
 `maxSplits`, separators lists and regex flags are invalid in grapheme mode.
 
-Native calls and extended fields use the real host's trimming/filtering rules;
+Native calls and other extended modes use the real host's trimming/filtering rules;
 they are not approximated with an ASCII or Unicode whitespace guess.
 Internal spans are zero-based UTF-16 ranges, translated to the observed host's
 one-based `Substring` positions. M1 does not expose token offsets. Code units,

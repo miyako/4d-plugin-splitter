@@ -227,6 +227,33 @@ void grapheme_tests() {
     check(spans[0].start == 0 && spans[0].length == 2 &&
               spans[1].start == 2 && spans[1].length == 1,
           "grapheme offsets are not UTF-16 offsets");
+    const std::u16string whitespace =
+        u"\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004"
+        u"\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000";
+    for (const auto unit : whitespace) {
+        const std::u16string source(1, unit);
+        fields(source, splitter::graphemes(source, defaults), {source});
+        fields(source, splitter::graphemes(source, defaults, true), {u""});
+        fields(source, splitter::regex(source, u"\\s", {}, unlimited, defaults), {u"", u""});
+    }
+    fields(u"\r\nx", splitter::graphemes(u"\r\nx", defaults, true), {u"", u"x"});
+    fields(u" \u0301😀\u00a0", splitter::graphemes(u" \u0301😀\u00a0", defaults, true),
+           {u"\u0301", u"😀", u""});
+    fields(malformed, splitter::graphemes(malformed, defaults, true),
+           {std::u16string(1, 0xd800), u"x", std::u16string(1, 0xdc00)});
+    for (const auto unit : std::u16string{u'\0', u'\u001c', u'\u180e', u'\u200b',
+                                        u'\u200d', u'\u2060', u'\ufeff'}) {
+        const std::u16string source(1, unit);
+        fields(source, splitter::graphemes(source, defaults, true), {source});
+        fields(source, splitter::regex(source, u"\\s", {}, unlimited, defaults), {source});
+    }
+    fields(u"", splitter::graphemes(u"", defaults, true), {});
+    Limits limits;
+    limits.max_items = 1;
+    error([&] { splitter::graphemes(u"\t ", limits, true); }, "limit");
+    limits = defaults;
+    limits.max_output_units = 1;
+    error([&] { splitter::graphemes(u"\r\n", limits, true); }, "output");
 }
 
 void limit_tests() {
