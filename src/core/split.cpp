@@ -170,6 +170,138 @@ UBool U_CALLCONV find_callback(const void* context, std::int64_t) {
     return !static_cast<const Operation*>(context)->expired();
 }
 
+bool comment_end(char16_t unit) {
+    return unit == u'\r' || unit == u'\n' || unit == u'\u0085' || unit == u'\u2028';
+}
+
+std::u16string grapheme_pattern(std::u16string_view pattern, bool comments,
+                                Operation& operation) {
+    std::u16string result;
+    std::vector<bool> scopes;
+    std::vector<unsigned> classes;
+    bool quoted = false;
+    std::size_t position = 0;
+    const auto append_until = [&](std::size_t end) {
+        result.append(pattern.substr(position, end - position));
+        position = end;
+    };
+    const auto significant = [&](std::size_t index, bool eol_comments = true) {
+        while (comments && index < pattern.size()) {
+            operation.tick();
+            if (u_hasBinaryProperty(pattern[index], UCHAR_PATTERN_WHITE_SPACE)) {
+                ++index;
+            } else if (eol_comments && pattern[index] == u'#') {
+                do {
+                    operation.tick();
+                    ++index;
+                } while (index < pattern.size() && !comment_end(pattern[index]));
+            } else break;
+        }
+        return index;
+    };
+    while (position < pattern.size()) {
+        operation.tick();
+        const auto unit = pattern[position];
+        if (quoted) {
+            if (pattern.substr(position, 2) == u"\\E") {
+                quoted = false;
+                append_until(position + 2);
+            } else {
+                append_until(position + 1);
+            }
+            continue;
+        }
+        if (comments && unit == u'#') {
+            auto end = position + 1;
+            while (end < pattern.size() && !comment_end(pattern[end])) {
+                operation.tick();
+                ++end;
+            }
+            append_until(end);
+            continue;
+        }
+        if (comments && u_hasBinaryProperty(unit, UCHAR_PATTERN_WHITE_SPACE)) {
+            append_until(position + 1);
+            continue;
+        }
+        if (unit == u'\\') {
+            auto end = std::min(position + 2, pattern.size());
+            if (end == position + 2) {
+                const auto escape = pattern[position + 1];
+                quoted = escape == u'Q';
+                if (escape == u'c') end = std::min(end + 1, pattern.size());
+                if ((escape == u'p' || escape == u'P' || escape == u'N' ||
+                     escape == u'x') && end < pattern.size() && pattern[end] == u'{') {
+                    do {
+                        operation.tick();
+                        ++end;
+                    } while (end < pattern.size() && pattern[end] != u'}');
+                    if (end < pattern.size()) ++end;
+                }
+            }
+            if (!classes.empty()) classes.back() = 2;
+            append_until(end);
+            continue;
+        }
+        if (unit == u'[') {
+            if (!classes.empty()) classes.back() = 2;
+            classes.push_back(0);
+        } else if (!classes.empty()) {
+            if (unit == u']' && classes.back() == 2) classes.pop_back();
+            else if (unit == u'^' && classes.back() == 0) classes.back() = 1;
+            else classes.back() = 2;
+        } else if (unit == u'(') {
+            const auto question = significant(position + 1);
+            auto end = significant(std::min(question + 1, pattern.size()), false);
+            const bool special_group = question < pattern.size() && pattern[question] == u'?';
+            if (special_group && end < pattern.size() && pattern[end] == u'#') {
+                while (end < pattern.size() && pattern[end] != u')') {
+                    operation.tick();
+                    ++end;
+                }
+                if (end < pattern.size()) ++end;
+                append_until(end);
+                continue;
+            }
+            bool next_comments = comments;
+            bool enable = true;
+            bool flag_group = special_group;
+            bool has_flag = false;
+            while (flag_group && end < pattern.size()) {
+                operation.tick();
+                const auto flag = pattern[end];
+                if (flag == u'-') enable = false;
+                else if (flag == u'x') { next_comments = enable; has_flag = true; }
+                else if (flag == u'i' || flag == u'm' || flag == u's' ||
+                         flag == u'd' || flag == u'u' || flag == u'w') has_flag = true;
+                else break;
+                end = significant(end + 1);
+            }
+            flag_group = flag_group && has_flag && end < pattern.size() &&
+                         (pattern[end] == u':' || pattern[end] == u')');
+            if (flag_group) {
+                if (pattern[end] == u':') scopes.push_back(comments);
+                comments = next_comments;
+                append_until(end + 1);
+                continue;
+            }
+            scopes.push_back(comments);
+        } else if (unit == u')' && !scopes.empty()) {
+            comments = scopes.back();
+            scopes.pop_back();
+        } else if (unit == u'.') {
+            // Dot assertions inherit scoped s/d flags. The second assertion
+            // also excludes a CRLF cluster when Unix-line dot rejects its LF.
+            result.append(u"(?:(?=.)(?!\\r(?!.)\\n)\\X)");
+            ++position;
+            continue;
+        }
+        append_until(position + 1);
+    }
+    operation.check();
+    return result;
+}
+
 } // namespace
 
 std::vector<Span> literal(std::u16string_view input, std::u16string_view separator,
@@ -244,6 +376,16 @@ std::vector<Span> regex(std::u16string_view input, std::u16string_view pattern,
                     &parse_error, &status), &uregex_close);
     check_icu(status, "regex compilation");
     require(matcher != nullptr, "regex compilation returned no matcher");
+    if (flags.grapheme_dots) {
+        const auto expanded = grapheme_pattern(pattern, flags.comments, operation);
+        if (expanded != pattern) {
+            UnicodeBuffer grapheme_expression(expanded);
+            matcher.reset(uregex_open(grapheme_expression.units.data(), icu_length(expanded.size()),
+                                     options, &parse_error, &status));
+            check_icu(status, "grapheme regex compilation");
+            require(matcher != nullptr, "grapheme regex compilation returned no matcher");
+        }
+    }
     operation.check();
     uregex_setTimeLimit(matcher.get(), limits.regex_steps, &status);
     uregex_setStackLimit(matcher.get(), limits.regex_stack_bytes, &status);

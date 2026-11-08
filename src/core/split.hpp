@@ -34,6 +34,7 @@ struct RegexFlags {
     bool comments = false;
     bool unicode_words = false;
     bool unix_lines = false;
+    bool grapheme_dots = false;
 };
 
 class Error : public std::runtime_error {
@@ -57,6 +58,8 @@ std::vector<Span> literals(std::u16string_view input,
                            const Limits& limits);
 // ICU zero-width boundaries, including start/end, produce empty fields.
 // In particular, an empty pattern on empty input produces two empty fields.
+// grapheme_dots makes wildcard dots consume \X, subject to dot's active
+// newline flags; escapes, quoted text and character classes are unchanged.
 std::vector<Span> regex(std::u16string_view input,
                         std::u16string_view pattern,
                         RegexFlags flags,

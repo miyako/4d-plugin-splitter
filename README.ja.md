@@ -40,6 +40,7 @@ Host/
         Windows64/Splitter.4DX      # Windows package: x64
         Resources/
           manifest.json
+          constants.xlf
           icudt79l.dat
           licenses/
           dependencies.lock.json
@@ -65,13 +66,22 @@ Host/
 $parts:=Split_string_Ex($text; $separator)
 $parts:=Split_string_Ex($text; $separator; $nativeOptions)
 $parts:=Split_string_Ex($text; $separator; $nativeOptions; $extensions)
+$parts:=Split_string_Ex($text; $pattern; sk mode regex)
+$parts:=Split_string_Ex($text; ""; sk mode graphemes)
 ```
 
-最初の 3 引数は、**本書に記載したリソース制限の範囲内で**ネイティブの `Split string` の
+モードビットを指定しない場合、最初の 3 引数は、**本書に記載したリソース制限の範囲内で**ネイティブの `Split string` の
 セマンティクスを維持します。Text の区切り文字は文字列全体をリテラルとして扱い、
 パターンや文字のリストとしては扱いません。空の区切り文字はネイティブの UTF-16 コード単位の
 動作を維持し、書記素分割にはなりません。ネイティブフラグの値は変わりません。
 `sk ignore empty strings` = 1、`sk trim spaces` = 2、両方 = 3 です。
+
+カスタム定数 `sk mode regex` = 4 と `sk mode graphemes` = 8 は、第 3 引数で
+拡張モードを選択します。`sk mode regex+sk trim spaces+sk ignore empty strings` のように
+ネイティブフラグと加算して指定できます。両モードビットを指定すると、正規表現の
+ワイルドカード `.` が書記素クラスタ単位で一致します。
+モード選択だけなら Object は不要です。区切り文字リスト、`maxSplits`、正規表現フラグ、
+リソース上限の引き下げには、引き続き省略可能な第 4 引数の Object を使用します。
 
 第 3・第 4 引数のオプションは省略できます。確認した 20.7 コンパイラーでは、プラグイン引数の省略時に
 参考警告 533.4 が出ますが、コンパイルは成功します。コンパイル済みコードで実際に省略した呼び出しも
@@ -88,7 +98,7 @@ Object にしています。区切り文字の Collection は必ずその Object
 失敗時は Null のみを返します。** `.length` の参照や反復処理の前に必ず確認してください。
 
 ```4d
-$parts:=Split_string_Ex($text; ","; 0; {mode: "regex"})
+$parts:=Split_string_Ex($text; ","; sk mode regex)
 If ($parts=Null)
     // Handle failure in the caller.
 Else
@@ -114,6 +124,9 @@ C++ 例外はプラグイン境界で捕捉し、外へ伝播させません。
 未知のキー、不正なメンバー型、矛盾する設定、上限の引き上げは Null を返します。
 第 4 引数が空の Object または Null ならネイティブの動作を維持します。
 拡張モードが受け付けるネイティブフラグの組み合わせは 0/1/2/3 のみです。
+ホストへ渡す前にモードビットを除去します。既存コードの Object の `mode` も引き続き使用できます。
+モードビットと明示的な `mode` を同時に指定する場合は一致が必要です。
+両ビットを指定した場合は `"regex"` と一致します。区切り文字リストとモードビットの併用は不正です。
 
 ### リテラル区切り文字リストと分割回数制限
 
@@ -136,14 +149,15 @@ $parts:=Split_string_Ex("a,b,c"; ","; 0; {maxSplits: 1})
 
 ### 正規表現
 
-第 2 引数がパターンになるのは `mode:"regex"` を指定した場合**だけ**です。
+第 2 引数がパターンになるのは `sk mode regex` または既存の Object 設定
+`mode:"regex"` を指定した場合**だけ**です。
 M1 では区切り文字とキャプチャグループを結果に含めません。
 
 ```4d
-$names:=Split_string_Ex("Bois-Joli / Morne-à-l’eau"; "\\s*/\\s*"; 0; {mode: "regex"})
+$names:=Split_string_Ex("Bois-Joli / Morne-à-l’eau"; "\\s*/\\s*"; sk mode regex)
 // ["Bois-Joli","Morne-à-l’eau"]
 
-$tokens:=Split_string_Ex("Bois-Joli Morne-à-l’eau"; "[-’\\s]+"; 0; {mode: "regex"})
+$tokens:=Split_string_Ex("Bois-Joli Morne-à-l’eau"; "[-’\\s]+"; sk mode regex)
 // ["Bois","Joli","Morne","à","l","eau"]
 ```
 
@@ -157,12 +171,31 @@ $tokens:=Split_string_Ex("Bois-Joli Morne-à-l’eau"; "[-’\\s]+"; 0; {mode: "
 `maxSplits` はゼロ幅一致を含め、一致した区切り文字の数を数えます。
 残りは、指定されたトリミングや空文字列除外を行う前にはそのまま保持されます。
 
+### 正規表現と書記素の併用
+
+```4d
+$parts:=Split_string_Ex("e"+Char(769)+"👩‍💻x"; ".{2}"; sk mode regex+sk mode graphemes)
+// ["","x"]: 区切りパターンは書記素クラスタ全体を 2 個消費します
+```
+
+文字クラス外のエスケープされていない `.` は、`\X` のように拡張書記素クラスタ全体に
+一致しますが、有効なドットの改行除外規則は維持します。`unixLines` を指定しても、
+ワイルドカードのドットが CRLF の一部だけを消費することはありません。
+`regexFlags.dotAll` またはインライン・スコープ付き `(?s)` を指定すると改行クラスタにも一致します。
+エスケープした `\.`、文字クラス内のドット、`\Q...\E` で囲んだリテラル、正規表現コメントは変更しません。
+内部では非キャプチャグループに展開し、キャプチャ番号と量指定子の結合を維持します。
+その他の正規表現要素とゼロ幅一致の前進は ICU の通常の動作のままです。
+明示的な `\X` はドットのフラグと無関係に改行クラスタにも一致します。
+可変長の `\X` を後読みで使用できない制約など、ICU の制約は引き続き適用されます。
+パターン上限は内部展開後ではなく、呼び出し側の元のパターンに適用します。
+通常の正規表現モードと同様、結果は一致したクラスタではなく、区切りパターンの**間**のフィールドです。
+
 ### 書記素
 
 第 2 引数を空にして、明示的に選択してください。
 
 ```4d
-$clusters:=Split_string_Ex($text; ""; 0; {mode: "graphemes"})
+$clusters:=Split_string_Ex($text; ""; sk mode graphemes)
 ```
 
 固定バージョンの ICU の文字境界を使い、拡張書記素クラスタを実装しています。
