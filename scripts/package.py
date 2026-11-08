@@ -39,6 +39,7 @@ def main():
     # Resource-only edits also need to be reflected when no relink was necessary.
     for source, target in (
         (ROOT / "resources/manifest.json", resources / "manifest.json"),
+        (ROOT / "resources/constants.xlf", resources / "constants.xlf"),
         (ROOT / "dependencies.lock.json", resources / "dependencies.lock.json"),
         (ROOT / "cmake/Info.plist", bundle / "Contents/Info.plist"),
         (ROOT / "licenses/4D-Plugin-SDK.txt", resources / "licenses/4D-Plugin-SDK.txt"),

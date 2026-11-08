@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff version="1.0" xmlns:d4="http://www.4d.com/d4-ns">
+    <group resname="themes">
+        <trans-unit id="SplitterModes" resname="SplitterModes" translate="no">
+            <source>Splitter Modes</source>
+        </trans-unit>
+    </group>
+    <group d4:groupName="SplitterModes" restype="x-4DK#">
+        <trans-unit d4:value="4" id="SplitterModes.1">
+            <source>sk mode regex</source>
+        </trans-unit>
+        <trans-unit d4:value="8" id="SplitterModes.2">
+            <source>sk mode graphemes</source>
+        </trans-unit>
+    </group>
+</xliff>

@@ -92,6 +92,9 @@ else()
     set(product_contents "${CMAKE_BINARY_DIR}/plugins/Splitter.bundle/Contents")
 endif()
 add_custom_command(TARGET Splitter POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/constants.xlf"
+        "${product_contents}/Resources/constants.xlf"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${SPLITTER_ICU_DATA}"
         "${product_contents}/Resources/icudt79l.dat"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${splitter_icu_SOURCE_DIR}/LICENSE"

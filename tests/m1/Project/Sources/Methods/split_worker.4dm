@@ -26,7 +26,7 @@ $passed:=0
 $failures:=0
 If ($state.start)
 	For ($index; 1; 200)
-		$actual:=Split_string_Ex(" a , , b "; ","; 3; {mode: "regex"})
+		$actual:=Split_string_Ex(" a , , b "; ","; sk mode regex+3)
 		If (check_collection($actual; New collection("a"; "b")))
 			$passed:=$passed+1
 		Else
@@ -44,8 +44,14 @@ If ($state.start)
 		Else
 			$failures:=$failures+1
 		End if
-		$actual:=Split_string_Ex("A"+Char(769)+"😀"; ""; 0; {mode: "graphemes"})
+		$actual:=Split_string_Ex("A"+Char(769)+"😀"; ""; sk mode graphemes)
 		If (check_collection($actual; New collection("A"+Char(769); "😀")))
+			$passed:=$passed+1
+		Else
+			$failures:=$failures+1
+		End if
+		$actual:=Split_string_Ex("A"+Char(769)+"😀"; "."; sk mode regex+sk mode graphemes)
+		If (check_collection($actual; New collection(""; ""; "")))
 			$passed:=$passed+1
 		Else
 			$failures:=$failures+1

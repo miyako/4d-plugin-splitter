@@ -17,7 +17,7 @@ def verify(result, compiled):
     observed = payload(result, "SPLITTER_M1=")
     if observed["compiled"] is not compiled or observed["failures"]:
         raise RuntimeError(f"M1 host assertions failed: {observed}\n{result}")
-    if observed["nativeCases"] != 1248 or observed["extendedCases"] != 56:
+    if observed["nativeCases"] != 1248 or observed["extendedCases"] != 83:
         raise RuntimeError(f"Incomplete host corpus: {observed}")
     if observed["passed"] != 1248 + observed["extendedCases"]:
         raise RuntimeError(f"Missing successful host assertions: {observed}")
@@ -68,7 +68,7 @@ def main():
             preemptive = payload(preemptive_result, "SPLITTER_PREEMPTIVE=")
             if preemptive != {
                 "compiled": True, "ready": 8, "done": 8,
-                "preemptive": 8, "passed": 9600, "failures": 0,
+                "preemptive": 8, "passed": 11200, "failures": 0,
             }:
                 raise RuntimeError(f"Compiled preemptive assertions failed: {preemptive_result}")
         # A fresh host process must not borrow data from the host or environment.

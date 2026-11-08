@@ -41,6 +41,7 @@ Host/
         Windows64/Splitter.4DX      # Windows package: x64
         Resources/
           manifest.json
+          constants.xlf
           icudt79l.dat
           licenses/
           dependencies.lock.json
@@ -66,13 +67,22 @@ Manifest: **`Split_string_Ex(&T;&T;&L;&J):C`**.
 $parts:=Split_string_Ex($text; $separator)
 $parts:=Split_string_Ex($text; $separator; $nativeOptions)
 $parts:=Split_string_Ex($text; $separator; $nativeOptions; $extensions)
+$parts:=Split_string_Ex($text; $pattern; sk mode regex)
+$parts:=Split_string_Ex($text; ""; sk mode graphemes)
 ```
 
-The first three arguments preserve native `Split string` semantics **within the
+Without mode bits, the first three arguments preserve native `Split string` semantics **within the
 documented resource limits**. Text separators are whole literal strings, not
 patterns or character lists. An empty separator retains native UTF-16 code-unit
 behavior, not grapheme splitting. Native flags remain unchanged:
 `sk ignore empty strings` = 1, `sk trim spaces` = 2, both = 3.
+
+Custom constants `sk mode regex` = 4 and `sk mode graphemes` = 8 select
+extended modes in the third argument. Add them to native flags, for example
+`sk mode regex+sk trim spaces+sk ignore empty strings`.
+Both mode bits together select regex splitting with grapheme-aware wildcard dots.
+The Object remains optional for separator lists, `maxSplits`, regex flags and
+lower resource limits; mode selection alone no longer needs it.
 
 Options 3 and 4 may be omitted. On the observed 20.7 compiler, missing plug-in
 parameters emit advisory warning 533.4 but compilation succeeds; actual compiled
@@ -89,7 +99,7 @@ Null is supported; the plug-in cannot recover a type already coerced by 4D.
 Failure returns Null alone.** Always check before using `.length` or iterating:
 
 ```4d
-$parts:=Split_string_Ex($text; ","; 0; {mode: "regex"})
+$parts:=Split_string_Ex($text; ","; sk mode regex)
 If ($parts=Null)
     // Handle failure in the caller.
 Else
@@ -115,6 +125,10 @@ native failures. C++ exceptions are contained at the plug-in boundary.
 Unknown keys, invalid member types, conflicting settings and raised ceilings return Null.
 An empty Object or Null fourth parameter retains native behavior.
 Extended modes accept only native flag combinations 0/1/2/3.
+Mode bits are removed before passing native flags to the host.
+The Object's `mode` remains supported for existing callers. If mode bits and
+an explicit `mode` are both provided, they must agree; combined bits agree
+with `"regex"`. Separator lists cannot be combined with either mode bit.
 
 ### Literal lists and split limits
 
@@ -137,14 +151,15 @@ native empty-input/empty-separator behavior remains unchanged.
 
 ### Regular expressions
 
-The second parameter becomes a pattern **only** with `mode:"regex"`.
+The second parameter becomes a pattern **only** with `sk mode regex`
+or the legacy Object setting `mode:"regex"`.
 Delimiters and captured groups are not returned in M1.
 
 ```4d
-$names:=Split_string_Ex("Bois-Joli / Morne-à-l’eau"; "\\s*/\\s*"; 0; {mode: "regex"})
+$names:=Split_string_Ex("Bois-Joli / Morne-à-l’eau"; "\\s*/\\s*"; sk mode regex)
 // ["Bois-Joli","Morne-à-l’eau"]
 
-$tokens:=Split_string_Ex("Bois-Joli Morne-à-l’eau"; "[-’\\s]+"; 0; {mode: "regex"})
+$tokens:=Split_string_Ex("Bois-Joli Morne-à-l’eau"; "[-’\\s]+"; sk mode regex)
 // ["Bois","Joli","Morne","à","l","eau"]
 ```
 
@@ -158,12 +173,33 @@ empty fields are retained unless native options request otherwise.
 `maxSplits` counts matched delimiters, including zero-width matches; its
 remainder is retained unchanged before requested trim/filter.
 
+### Regex + graphemes
+
+```4d
+$parts:=Split_string_Ex("e"+Char(769)+"👩‍💻x"; ".{2}"; sk mode regex+sk mode graphemes)
+// ["","x"]: the delimiter consumes two entire grapheme clusters
+```
+
+An unescaped `.` outside character classes consumes an extended grapheme
+cluster, like `\X`, but keeps dot's active newline exclusions. CRLF is never
+partially consumed by a wildcard dot, including with `unixLines`.
+`regexFlags.dotAll` or scoped/inline `(?s)` allows newline clusters too.
+Escaped `\.`, dots in character classes, `\Q...\E` quoted text and regex
+comments stay unchanged. Noncapturing expansion preserves capture numbering
+and quantifier binding. Other regex atoms and zero-width advancement keep ICU's
+normal semantics; this is not a change to every atom's matching unit.
+Explicit `\X` still matches newline clusters independently of dot flags.
+ICU restrictions still apply, including no variable-length `\X` in lookbehind.
+Pattern limits count the caller's original pattern, not the internal expansion.
+As in ordinary regex mode, the result contains fields **between** matched
+delimiters, not the matched clusters.
+
 ### Graphemes
 
 Use an empty second parameter and explicitly opt in:
 
 ```4d
-$clusters:=Split_string_Ex($text; ""; 0; {mode: "graphemes"})
+$clusters:=Split_string_Ex($text; ""; sk mode graphemes)
 ```
 
 Pinned ICU character boundaries implement extended grapheme clusters: surrogate

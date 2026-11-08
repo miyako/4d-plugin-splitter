@@ -187,6 +187,10 @@ void boolean_option(PA_ObjectRef object, std::u16string_view name, bool& setting
 
 enum class Mode { literal, literals, regex, graphemes };
 
+constexpr PA_long32 mode_regex = 4;
+constexpr PA_long32 mode_graphemes = 8;
+constexpr PA_long32 mode_mask = mode_regex | mode_graphemes;
+
 struct Options {
     Mode mode = Mode::literal;
     splitter::Limits limits;
@@ -197,9 +201,14 @@ struct Options {
     bool separators_present = false;
 };
 
-Options parse_options(PA_ObjectRef object)
+Options parse_options(PA_ObjectRef object, PA_long32 flags)
 {
     Options result;
+    const auto modes = flags & mode_mask;
+    if ((modes & mode_regex) != 0) result.mode = Mode::regex;
+    else if ((modes & mode_graphemes) != 0) result.mode = Mode::graphemes;
+    const auto selected_mode = result.mode;
+    result.regex_flags.grapheme_dots = modes == mode_mask;
     if (object == nullptr) {
         return result;
     }
@@ -216,6 +225,9 @@ Options parse_options(PA_ObjectRef object)
         else if (name == u"regex") result.mode = Mode::regex;
         else if (name == u"graphemes") result.mode = Mode::graphemes;
         else throw splitter::Error("Unknown mode");
+        if (modes != 0 && result.mode != selected_mode) {
+            throw splitter::Error("Mode flags conflict with options mode");
+        }
     }
     Variable limits(property(object, u"limits"));
     if (!absent(limits.value)) {
@@ -267,7 +279,7 @@ Options parse_options(PA_ObjectRef object)
             units += text.size();
             result.separators.push_back(std::move(text));
         }
-        if (!explicit_mode) result.mode = Mode::literals;
+        if (!explicit_mode && modes == 0) result.mode = Mode::literals;
     }
     Variable regex_flags(property(object, u"regexFlags"));
     if (!absent(regex_flags.value)) {
@@ -384,8 +396,9 @@ void split(PA_PluginParameters params)
     PA_Unistring* native_input = PA_GetStringParameter(params, 1);
     PA_Unistring* native_separator = PA_GetStringParameter(params, 2);
     if (!native_input || !native_separator) throw splitter::Error("Missing Text parameter");
-    const auto flags = PA_GetLongParameter(params, 3);
-    const auto options = parse_options(PA_GetObjectParameter(params, 4));
+    const auto all_flags = PA_GetLongParameter(params, 3);
+    const auto flags = all_flags & ~mode_mask;
+    const auto options = parse_options(PA_GetObjectParameter(params, 4), all_flags);
     const auto input = copy_text(*native_input, options.limits.max_input_units);
     const auto separator = copy_text(*native_separator, options.limits.max_input_units);
     deadline(start, options.limits);

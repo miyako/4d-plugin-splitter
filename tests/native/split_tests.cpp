@@ -207,6 +207,73 @@ void regex_tests() {
     error([] { splitter::regex(u"abc", u"(", {}, 0, defaults); }, "compilation");
 }
 
+void grapheme_regex_tests() {
+    RegexFlags flags;
+    flags.grapheme_dots = true;
+    const auto split = [&](std::u16string_view source, std::u16string_view pattern,
+                           const std::vector<std::u16string>& expected) {
+        try {
+            fields(source, splitter::regex(source, pattern, flags, unlimited, defaults), expected);
+        } catch (const std::exception& failure) {
+            throw std::runtime_error(std::string(pattern.begin(), pattern.end()) + ": " +
+                                     failure.what());
+        }
+    };
+    split(u"e\u0301👩‍💻👍🏽🇯🇵", u".", {u"", u"", u"", u"", u""});
+    split(u"e\u0301👩‍💻x", u".{2}", {u"", u"x"});
+    split(u"e\u0301👩‍💻x", u"(.)(.)", {u"", u"x"});
+    split(u"e\u0301e\u0301x", u"(.)\\1", {u"", u"x"});
+    split(u"e\u0301\n👩‍💻\r\n👍🏽\u0085🇯🇵\u2028x\u2029", u".",
+          {u"", u"\n", u"\r\n", u"\u0085", u"\u2028", u"\u2029"});
+    split(u"e\u0301\r\nx", u"\\X", {u"", u"", u"", u""});
+    split(u"a.e\u0301", u"\\.", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"[.]", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"[[.][,]]", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"[[:punct:]]", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"[]a.]", {u"", u"", u"e\u0301"});
+    split(u"a.e\u0301", u"[\\]]|\\.", {u"a", u"e\u0301"});
+    split(u"ae\u0301", u"[^^].", {u"", u""});
+    split(u"a.e\u0301", u"\\Q.\\E", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"(?# . ( )\\.", {u"a", u"e\u0301"});
+    split(u"e\u0301", u"(?x) # . [ ( \\Q \n .", {u"", u""});
+    split(u"e\u0301", u"(?x: # . [ ( \\Q \n .)", {u"", u""});
+    split(u"e\u0301", u"(?x)# .\u0085.", {u"", u""});
+    split(u"e\u0301", u"(?x)# .\u2028.", {u"", u""});
+    split(u"e\u0301#👩‍💻", u"(?x:(?-x:.#))", {u"", u"👩‍💻"});
+    split(u"e\u0301#👩‍💻", u"(?x:.)(?-x)#.", {u"", u""});
+    split(u"e\u0301#👩‍💻", u"(?x)(?-x # . [ (\n:.#.)", {u"", u""});
+    split(u"e\u0301\nx", u"(?s:.)", {u"", u"", u"", u""});
+    split(u"e\u0301\nx", u"(?s)(?-s:.)", {u"", u"\n", u""});
+    split(u"\r\nx", u"(?d:.)", {u"\r\n", u""});
+    split(u"\r\nx", u"(?ds:.)", {u"", u"", u""});
+    split(u"\u0085x", u"(?d:.)", {u"", u"", u""});
+    split(u"", u"", {u"", u""});
+    split(u"e\u0301", u"", {u"", u"e", u"\u0301", u""});
+    fields(u"e\u0301👩‍💻x", splitter::regex(u"e\u0301👩‍💻x", u".", flags, 1, defaults),
+           {u"", u"👩‍💻x"});
+    flags.comments = true;
+    split(u"e\u0301", u" # . [ ( \\Q \n .", {u"", u""});
+    split(u"e\u0301", u"(?-x:.)", {u"", u""});
+    split(u"e\u0301", u"( ? x : . )", {u"", u""});
+    split(u"e\u0301#👩‍💻", u"( ? - x :.#.)", {u"", u""});
+    split(u"a.e\u0301", u"( ? # . [ ( )\\.", {u"a", u"e\u0301"});
+    split(u"a.e\u0301", u"\\Q.\\E", {u"a", u"e\u0301"});
+    flags.comments = false;
+    flags.dot_all = true;
+    split(u"\r\nx", u".", {u"", u"", u""});
+    flags.dot_all = false;
+    flags.unix_lines = true;
+    split(u"\r\nx", u".", {u"\r\n", u""});
+    split(u"\rx", u".", {u"", u"", u""});
+    flags.unix_lines = false;
+    Limits limits;
+    limits.max_pattern_units = 1;
+    fields(u"e\u0301", splitter::regex(u"e\u0301", u".", flags, unlimited, limits),
+           {u"", u""});
+    error([&] { splitter::regex(u"abc", u"(.(", flags, unlimited, defaults); }, "compilation");
+    error([&] { splitter::regex(u"abc", u"..", flags, unlimited, limits); }, "pattern");
+}
+
 void grapheme_tests() {
     fields(u"", splitter::graphemes(u"", defaults), {});
     fields(u"\r\nx", splitter::graphemes(u"\r\nx", defaults), {u"\r\n", u"x"});
@@ -381,6 +448,11 @@ void thread_tests() {
                                {id, u"😀", u"e\u0301", u"👩‍💻"});
                         fields(clusters, splitter::graphemes(clusters, defaults),
                                {u"e\u0301", u"👩‍💻", u"👍🏽", u"🇯🇵", u"\r\n", id});
+                        RegexFlags flags;
+                        flags.grapheme_dots = true;
+                        fields(clusters, splitter::regex(clusters, u".", flags,
+                                                         unlimited, defaults),
+                               {u"", u"", u"", u"", u"\r\n", u""});
                         fields(zero_width, splitter::regex(zero_width, u"", {},
                                                            unlimited, defaults),
                                {u"", u"😀", id, u""});
@@ -422,6 +494,7 @@ int main(int argc, char** argv) {
         literal_tests();
         list_tests();
         regex_tests();
+        grapheme_regex_tests();
         grapheme_tests();
         limit_tests();
         thread_tests();
