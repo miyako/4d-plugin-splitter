@@ -17,7 +17,7 @@ def verify(result, compiled):
     observed = payload(result, "SPLITTER_M1=")
     if observed["compiled"] is not compiled or observed["failures"]:
         raise RuntimeError(f"M1 host assertions failed: {observed}\n{result}")
-    if observed["nativeCases"] != 1248 or observed["extendedCases"] != 46:
+    if observed["nativeCases"] != 1248 or observed["extendedCases"] != 56:
         raise RuntimeError(f"Incomplete host corpus: {observed}")
     if observed["passed"] != 1248 + observed["extendedCases"]:
         raise RuntimeError(f"Missing successful host assertions: {observed}")

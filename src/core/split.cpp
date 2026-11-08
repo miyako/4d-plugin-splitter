@@ -1,6 +1,7 @@
 #include "split.hpp"
 
 #include <unicode/ubrk.h>
+#include <unicode/uchar.h>
 #include <unicode/uregex.h>
 #include <unicode/utypes.h>
 
@@ -274,7 +275,7 @@ std::vector<Span> regex(std::u16string_view input, std::u16string_view pattern,
     return std::move(operation.spans);
 }
 
-std::vector<Span> graphemes(std::u16string_view input, const Limits& limits) {
+std::vector<Span> graphemes(std::u16string_view input, const Limits& limits, bool trim_spaces) {
     validate(limits, input);
     Operation operation(limits);
     if (input.empty()) return {};
@@ -296,6 +297,18 @@ std::vector<Span> graphemes(std::u16string_view input, const Limits& limits) {
                 "invalid grapheme boundary");
         operation.candidate();
         operation.emit(static_cast<std::size_t>(start), static_cast<std::size_t>(end - start));
+        if (trim_spaces) {
+            auto& span = operation.spans.back();
+            while (span.length != 0 && u_isUWhiteSpace(input[span.start])) {
+                operation.tick();
+                ++span.start;
+                --span.length;
+            }
+            while (span.length != 0 && u_isUWhiteSpace(input[span.start + span.length - 1])) {
+                operation.tick();
+                --span.length;
+            }
+        }
         start = end;
     }
     require(static_cast<std::size_t>(start) == input.size(), "incomplete grapheme boundaries");

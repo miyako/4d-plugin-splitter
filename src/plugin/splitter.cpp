@@ -426,7 +426,7 @@ void split(PA_PluginParameters params)
         break;
     case Mode::graphemes:
         splitter::initialize_icu(data_path());
-        spans = splitter::graphemes(input, options.limits);
+        spans = splitter::graphemes(input, options.limits, (flags & 2) != 0);
         break;
     }
     Variable output(execute(1472, nullptr, 0));
@@ -436,7 +436,9 @@ void split(PA_PluginParameters params)
     const auto collection = PA_GetCollectionVariable(output.value);
     if (collection == nullptr) throw splitter::Error("Collection allocation failed");
     std::optional<String> trim_separator;
-    if ((flags & 2) != 0) trim_separator.emplace(absent_delimiter(input));
+    if ((flags & 2) != 0 && options.mode != Mode::graphemes) {
+        trim_separator.emplace(absent_delimiter(input));
+    }
     PA_long32 output_index = 0;
     for (const auto& span : spans) {
         deadline(start, options.limits);

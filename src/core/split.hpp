@@ -62,6 +62,9 @@ std::vector<Span> regex(std::u16string_view input,
                         RegexFlags flags,
                         std::optional<std::size_t> max_splits,
                         const Limits& limits);
-std::vector<Span> graphemes(std::u16string_view input, const Limits& limits);
+// Optional trimming uses Unicode White_Space (ICU regex \s), retains empty
+// spans, and applies resource limits to the original untrimmed clusters.
+std::vector<Span> graphemes(std::u16string_view input, const Limits& limits,
+                            bool trim_spaces = false);
 
 } // namespace splitter

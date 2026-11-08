@@ -1,6 +1,6 @@
 //%attributes = {"invisible":true}
 var $sources; $separators; $actual; $expected; $cases; $failures; $many : Collection
-var $source; $separator; $nul; $combining; $family; $skin; $flagEmoji; $crlf; $evil; $private; $before : Text
+var $source; $separator; $nul; $combining; $family; $skin; $flagEmoji; $crlf; $evil; $private; $before; $whitespace : Text
 var $flags; $passed; $index : Integer
 var $case; $report; $unchanged : Object
 var $ok : Boolean
@@ -68,6 +68,21 @@ $cases.push({name: "names fine"; input: "Bois-Joli Morne-à-l’eau"; separator:
 $cases.push({name: "unicode graphemes"; input: "A😀"+$combining+$family+$skin+$flagEmoji+$crlf; separator: ""; flags: 0; options: {mode: "graphemes"}; expected: New collection:C1472("A"; "😀"; $combining; $family; $skin; $flagEmoji; $crlf)})
 $cases.push({name: "empty graphemes"; input: ""; separator: ""; flags: 0; options: {mode: "graphemes"}; expected: New collection:C1472})
 $cases.push({name: "grapheme trim filter"; input: " "+$combining+" "; separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472($combining)})
+$whitespace:=Char:C90(9)+$crlf+Char:C90(160)+Char:C90(12288)
+$cases.push({name: "grapheme whitespace unchanged"; input: $whitespace; separator: ""; flags: 0; options: {mode: "graphemes"}; expected: New collection:C1472(Char:C90(9); $crlf; Char:C90(160); Char:C90(12288))})
+$cases.push({name: "grapheme ignore without trim"; input: $whitespace; separator: ""; flags: 1; options: {mode: "graphemes"}; expected: New collection:C1472(Char:C90(9); $crlf; Char:C90(160); Char:C90(12288))})
+$cases.push({name: "grapheme whitespace trim only"; input: $whitespace; separator: ""; flags: 2; options: {mode: "graphemes"}; expected: New collection:C1472(""; ""; ""; "")})
+$cases.push({name: "grapheme whitespace trim filter"; input: $whitespace; separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472})
+$whitespace:=""
+For each ($index; New collection:C1472(9; 10; 11; 12; 13; 32; 133; 160; 5760; 8192; 8193; 8194; 8195; 8196; 8197; 8198; 8199; 8200; 8201; 8202; 8232; 8233; 8239; 8287; 12288))
+	$whitespace:=$whitespace+Char:C90($index)
+End for each
+$cases.push({name: "grapheme all Unicode whitespace"; input: $whitespace+"😀"; separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472("😀")})
+$cases.push({name: "grapheme trimmed combining cluster"; input: " "+Char:C90(769)+"😀"; separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472(Char:C90(769); "😀")})
+$cases.push({name: "grapheme non-whitespace preserved"; input: Char:C90(28)+Char:C90(6158)+Char:C90(8203)+Char:C90(8288)+Char:C90(65279); separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472(Char:C90(28); Char:C90(6158); Char:C90(8203); Char:C90(8288); Char:C90(65279))})
+$cases.push({name: "grapheme mixed whitespace filter"; input: Char:C90(9)+$combining+$crlf+$family+Char:C90(160); separator: ""; flags: 3; options: {mode: "graphemes"}; expected: New collection:C1472($combining; $family)})
+$cases.push({name: "grapheme candidates before trimming"; input: Char:C90(9)+" "; separator: ""; flags: 3; options: {mode: "graphemes"; limits: {maxItems: 1}}; failure: True})
+$cases.push({name: "grapheme units before trimming"; input: $crlf; separator: ""; flags: 3; options: {mode: "graphemes"; limits: {maxOutputUnits: 1}}; failure: True})
 $cases.push({name: "invalid regex"; input: "abc"; separator: "*"; flags: 0; options: {mode: "regex"}; failure: True})
 $cases.push({name: "invalid regex zero max"; input: "abc"; separator: "*"; flags: 0; options: {mode: "regex"; maxSplits: 0}; failure: True})
 $cases.push({name: "unknown mode"; input: "abc"; separator: ","; flags: 0; options: {mode: "csv"}; failure: True})
