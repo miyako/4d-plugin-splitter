@@ -165,7 +165,9 @@ class BumpVersionTests(unittest.TestCase):
         ):
             with self.subTest(event=event, ref=ref):
                 self.env.update(GITHUB_EVENT_NAME=event, GITHUB_REF=ref)
-                result = subprocess.run(["bash", "-eu", "-c", guard], env=self.env,
+                # Windows CreateProcess prefers System32\bash.exe (WSL) over PATH.
+                bash = shutil.which("bash", path=self.env.get("PATH")) or "bash"
+                result = subprocess.run([bash, "-eu", "-c", guard], env=self.env,
                                         capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, allowed, result.stderr)
                 if not allowed:
