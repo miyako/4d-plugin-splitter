@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 if(CMAKE_HOST_APPLE AND NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment target")
 endif()
-project(Splitter VERSION 0.1.3 LANGUAGES CXX)
+project(Splitter VERSION 0.1.4 LANGUAGES CXX)
 
 if(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "The native 4D plug-in targets macOS and Windows only")
