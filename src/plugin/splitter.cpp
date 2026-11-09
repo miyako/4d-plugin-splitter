@@ -425,6 +425,8 @@ void split(PA_PluginParameters params)
         throw splitter::Error("This mode requires an empty Text separator");
     }
     std::vector<splitter::Span> spans;
+    const bool unicode_trim = (flags & 2) != 0 &&
+        (options.mode == Mode::graphemes || options.regex_flags.grapheme_dots);
     switch (options.mode) {
     case Mode::literal:
         spans = splitter::literal(input, separator, options.max_splits, options.limits);
@@ -435,11 +437,11 @@ void split(PA_PluginParameters params)
     case Mode::regex:
         splitter::initialize_icu(data_path());
         spans = splitter::regex(input, separator, options.regex_flags,
-                                options.max_splits, options.limits);
+                                options.max_splits, options.limits, unicode_trim);
         break;
     case Mode::graphemes:
         splitter::initialize_icu(data_path());
-        spans = splitter::graphemes(input, options.limits, (flags & 2) != 0);
+        spans = splitter::graphemes(input, options.limits, unicode_trim);
         break;
     }
     Variable output(execute(1472, nullptr, 0));
@@ -449,7 +451,7 @@ void split(PA_PluginParameters params)
     const auto collection = PA_GetCollectionVariable(output.value);
     if (collection == nullptr) throw splitter::Error("Collection allocation failed");
     std::optional<String> trim_separator;
-    if ((flags & 2) != 0 && options.mode != Mode::graphemes) {
+    if ((flags & 2) != 0 && !unicode_trim) {
         trim_separator.emplace(absent_delimiter(input));
     }
     PA_long32 output_index = 0;

@@ -42,8 +42,8 @@ public:
     using std::runtime_error::runtime_error;
 };
 
-// All offsets address the original UTF-16 input. No normalization, trimming,
-// filtering, delimiter retention, or capture expansion is performed.
+// All offsets address the original UTF-16 input. No normalization, filtering,
+// delimiter retention, or capture expansion is performed. Literal modes do not trim.
 // max_splits == 0 returns one unsplit field, including for empty input.
 // An empty literal separator splits code units; empty input then has no fields.
 std::vector<Span> literal(std::u16string_view input,
@@ -60,11 +60,13 @@ std::vector<Span> literals(std::u16string_view input,
 // In particular, an empty pattern on empty input produces two empty fields.
 // grapheme_dots makes wildcard dots consume \X, subject to dot's active
 // newline flags; escapes, quoted text and character classes are unchanged.
+// Optional trimming uses Unicode White_Space (ICU regex \s) after matching,
+// retaining empty spans and checking limits against original untrimmed fields.
 std::vector<Span> regex(std::u16string_view input,
                         std::u16string_view pattern,
                         RegexFlags flags,
                         std::optional<std::size_t> max_splits,
-                        const Limits& limits);
+                        const Limits& limits, bool trim_spaces = false);
 // Optional trimming uses Unicode White_Space (ICU regex \s), retains empty
 // spans, and applies resource limits to the original untrimmed clusters.
 std::vector<Span> graphemes(std::u16string_view input, const Limits& limits,

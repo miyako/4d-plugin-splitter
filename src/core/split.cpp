@@ -105,6 +105,18 @@ private:
     std::size_t output_units_ = 0;
 };
 
+void trim_unicode_spaces(std::u16string_view input, Span& span, Operation& operation) {
+    while (span.length != 0 && u_isUWhiteSpace(input[span.start])) {
+        operation.tick();
+        ++span.start;
+        --span.length;
+    }
+    while (span.length != 0 && u_isUWhiteSpace(input[span.start + span.length - 1])) {
+        operation.tick();
+        --span.length;
+    }
+}
+
 // Conversion, rather than pointer punning, also works when ICU configures
 // UChar as a distinct 16-bit integer type.
 struct UnicodeBuffer {
@@ -352,7 +364,7 @@ std::vector<Span> literals(std::u16string_view input,
 
 std::vector<Span> regex(std::u16string_view input, std::u16string_view pattern,
                         RegexFlags flags, std::optional<std::size_t> max_splits,
-                        const Limits& limits) {
+                        const Limits& limits, bool trim_spaces) {
     validate(limits, input);
     validate_pattern(pattern.size(), limits);
     Operation operation(limits);
@@ -414,6 +426,12 @@ std::vector<Span> regex(std::u16string_view input, std::u16string_view pattern,
         ++consumed;
     }
     operation.emit(cursor, input.size() - cursor);
+    if (trim_spaces) {
+        for (auto& span : operation.spans) {
+            operation.check();
+            trim_unicode_spaces(input, span, operation);
+        }
+    }
     return std::move(operation.spans);
 }
 
@@ -440,16 +458,7 @@ std::vector<Span> graphemes(std::u16string_view input, const Limits& limits, boo
         operation.candidate();
         operation.emit(static_cast<std::size_t>(start), static_cast<std::size_t>(end - start));
         if (trim_spaces) {
-            auto& span = operation.spans.back();
-            while (span.length != 0 && u_isUWhiteSpace(input[span.start])) {
-                operation.tick();
-                ++span.start;
-                --span.length;
-            }
-            while (span.length != 0 && u_isUWhiteSpace(input[span.start + span.length - 1])) {
-                operation.tick();
-                --span.length;
-            }
+            trim_unicode_spaces(input, operation.spans.back(), operation);
         }
         start = end;
     }

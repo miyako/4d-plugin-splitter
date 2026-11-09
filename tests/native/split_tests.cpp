@@ -274,6 +274,75 @@ void grapheme_regex_tests() {
     error([&] { splitter::regex(u"abc", u"..", flags, unlimited, limits); }, "pattern");
 }
 
+void grapheme_regex_trim_tests() {
+    RegexFlags flags;
+    flags.grapheme_dots = true;
+    const auto split = [&](std::u16string_view source, std::u16string_view pattern,
+                           const std::vector<std::u16string>& expected,
+                           std::optional<std::size_t> maximum = unlimited) {
+        fields(source, splitter::regex(source, pattern, flags, maximum, defaults, true),
+               expected);
+    };
+    split(u"　やや　。、 ご機嫌　、斜め。", u"[、。]",
+          {u"やや", u"", u"ご機嫌", u"斜め", u""});
+    const std::u16string whitespace =
+        u"\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004"
+        u"\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000";
+    for (const auto unit : whitespace) {
+        const std::u16string edge(1, unit);
+        split(edge + u"a" + edge + u"," + edge, u",", {u"a", u""});
+    }
+    split(whitespace + u"a" + whitespace, u",", {u"a"});
+    split(u"\u3000,\u00a0,\t\r\n", u",", {u"", u"", u""});
+    split(u"", u",", {u""});
+    split(u"", u"", {u"", u""});
+    split(u"\u3000a\u00a0b\tc\r\nd\u3000", u",", {u"a\u00a0b\tc\r\nd"});
+    split(u"\u3000a,b\u3000", u"^a|b$", {u"a,b"});
+    split(u"\u3000,a,\u00a0b\u3000", u"(?<=\\u3000),|,(?=\\u00a0)",
+          {u"", u"a", u"b"});
+    split(u"\u3000a\u3000,b", u"\\u3000,", {u"a", u"b"});
+    split(u"\u3000a,\u00a0b, c\u3000", u",", {u"a", u"b, c"}, 1);
+    split(u"\u3000a,\u00a0b\u3000", u",", {u"a,\u00a0b"}, 0);
+    split(u"\u3000a\u3000", u"^|$", {u"", u"a", u""});
+    split(u"\u3000e\u0301, 👩‍💻\u00a0", u",", {u"e\u0301", u"👩‍💻"});
+    split(u" \u0301 \u00a0", u",", {u"\u0301"});
+    split(u" \u0301x\u3000", u".", {u"", u"", u"", u""});
+    split(u"e\u0301", u"", {u"", u"e", u"\u0301", u""});
+    const std::u16string non_whitespace =
+        u"\u001c\u180e\u200b\u200d\u2060\ufeff😀";
+    split(u"\u3000" + non_whitespace + u"\u00a0", u",", {non_whitespace});
+    const std::u16string malformed{u' ', 0xd800, u'x', 0xdc00, u'\t'};
+    split(malformed, u",", {malformed.substr(1, 3)});
+    const std::u16string nul_source{u' ', 0, u'\t'};
+    split(nul_source, u",", {std::u16string(1, 0)});
+    const auto spans = splitter::regex(u"\u3000😀\u00a0,\tb\u3000", u",",
+                                       flags, unlimited, defaults, true);
+    check(spans.size() == 2 && spans[0].start == 1 && spans[0].length == 2 &&
+              spans[1].start == 6 && spans[1].length == 1,
+          "trimmed regex offsets are not original UTF-16 offsets");
+    fields(u"\u3000a,\u00a0", splitter::regex(u"\u3000a,\u00a0", u",",
+                                            flags, unlimited, defaults),
+           {u"\u3000a", u"\u00a0"});
+    fields(u"\u3000a,\u00a0", splitter::regex(u"\u3000a,\u00a0", u",",
+                                            {}, unlimited, defaults),
+           {u"\u3000a", u"\u00a0"});
+    Limits limits;
+    limits.max_items = 1;
+    error([&] { splitter::regex(u"\u3000,\u00a0", u",", flags, unlimited, limits, true); },
+          "item");
+    error([&] { splitter::regex(u"\u3000", u"", flags, unlimited, limits, true); },
+          "limit");
+    limits = defaults;
+    limits.max_output_units = 1;
+    error([&] { splitter::regex(u"\u3000a", u",", flags, unlimited, limits, true); },
+          "output");
+    error([&] { splitter::regex(u"\u3000a", u",", flags, 0, limits, true); }, "output");
+    limits.max_output_units = 2;
+    fields(u"\u3000a", splitter::regex(u"\u3000a", u",", flags, unlimited, limits, true),
+           {u"a"});
+    error([&] { splitter::regex(u" a ", u"(", flags, 0, defaults, true); }, "compilation");
+}
+
 void grapheme_tests() {
     fields(u"", splitter::graphemes(u"", defaults), {});
     fields(u"\r\nx", splitter::graphemes(u"\r\nx", defaults), {u"\r\n", u"x"});
@@ -495,6 +564,7 @@ int main(int argc, char** argv) {
         list_tests();
         regex_tests();
         grapheme_regex_tests();
+        grapheme_regex_trim_tests();
         grapheme_tests();
         limit_tests();
         thread_tests();

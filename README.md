@@ -80,9 +80,17 @@ behavior, not grapheme splitting. Native flags remain unchanged:
 Custom constants `sk mode regex` = 4 and `sk mode graphemes` = 8 select
 extended modes in the third argument. Add them to native flags, for example
 `sk mode regex+sk trim spaces+sk ignore empty strings`.
-Both mode bits together select regex splitting with grapheme-aware wildcard dots.
+Both mode bits together select regex splitting with grapheme-aware wildcard dots
+and Unicode trimming when `sk trim spaces` is set.
 The Object remains optional for separator lists, `maxSplits`, regex flags and
 lower resource limits; mode selection alone no longer needs it.
+
+| Mode | Selection | `sk trim spaces` behavior |
+| --- | --- | --- |
+| Literal / literal list | No mode bits; optional Object | Native 4D trimming |
+| Regex | `sk mode regex` or `mode:"regex"` | Native 4D trimming |
+| Graphemes | `sk mode graphemes` or `mode:"graphemes"` | Unicode `White_Space` per cluster |
+| Regex + graphemes | Both mode bits | Unicode `White_Space` per result field |
 
 Options 3 and 4 may be omitted. On the observed 20.7 compiler, missing plug-in
 parameters emit advisory warning 533.4 but compilation succeeds; actual compiled
@@ -194,6 +202,27 @@ Pattern limits count the caller's original pattern, not the internal expansion.
 As in ordinary regex mode, the result contains fields **between** matched
 delimiters, not the matched clusters.
 
+With `sk trim spaces`, combined mode trims leading/trailing Unicode `White_Space`
+(the same set as ICU regex `\s`) from each result field, even when the pattern
+has no wildcard dots. This includes U+3000 ideographic space, NBSP, tabs and
+line breaks; internal whitespace is preserved. Matching always sees the original,
+untrimmed source, so anchors, lookarounds, delimiter matching and `maxSplits`
+counts do not change. The remainder is trimmed only after matching, and candidate
+item/output limits still apply before trimming/filtering.
+Whitespace-only fields become empty strings; `sk ignore empty strings` removes
+them **after** trimming. Without trim, fields are unchanged; ignore alone removes
+only already-empty fields.
+
+```4d
+$parts:=Split_string_Ex("　やや　。、 ご機嫌　、斜め。"; "[、。]"; sk mode regex+sk mode graphemes+sk trim spaces+sk ignore empty strings)
+// ["やや","ご機嫌","斜め"]
+```
+
+**Compatibility change:** combined mode previously delegated trimming to 4D.
+It now removes more kinds of whitespace and can return fewer fields when ignore
+is also set. Ordinary regex, literal and list modes retain native 4D semantics;
+standalone grapheme Unicode trimming is unchanged.
+
 ### Graphemes
 
 Use an empty second parameter and explicitly opt in:
@@ -212,7 +241,7 @@ and ideographic spaces. Trimmed whitespace-only fields become empty strings;
 add `sk ignore empty strings` to remove them. Neither flag changes the input.
 `maxSplits`, separators lists and regex flags are invalid in grapheme mode.
 
-Native calls and other extended modes use the real host's trimming/filtering rules;
+Native literal calls, literal lists and ordinary regex mode use the real host's trimming/filtering rules;
 they are not approximated with an ASCII or Unicode whitespace guess.
 Internal spans are zero-based UTF-16 ranges, translated to the observed host's
 one-based `Substring` positions. M1 does not expose token offsets. Code units,
