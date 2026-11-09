@@ -14,21 +14,21 @@ license together with the complete ICU/data and 4D Plug-in SDK notices under
 
 ## Installation
 
-Published downloads are available in [v0.1.0](https://github.com/miyako/4d-plugin-splitter/releases/tag/v0.1.0):
-[`Splitter-macos-signed.dmg`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.dmg)
-and [`Splitter-macos-signed.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.zip)
-are universal arm64/x86_64, Developer ID signed and notarized; the DMG is
-stapled, the ZIP is not.
-[`Splitter-windows-x64.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-windows-x64.zip)
-is unsigned. This release was manually published after the build/signing
-workflows. Ordinary push/PR builds remain unsigned Actions artifacts; the manual
-**Build** workflow now signs and publishes new releases after verification.
+Download from [Releases](https://github.com/miyako/4d-plugin-splitter/releases/latest).
+Each release ships `Splitter-X.Y.Z.dmg` and `Splitter-X.Y.Z.zip` with **the same
+cross-platform `Splitter.bundle`**: a universal arm64/x86_64 macOS binary
+(Developer ID signed and notarized) and a Windows x64 binary (not Authenticode
+signed). Either archive works on either platform; you can download on a Mac and
+copy the bundle to Windows. The DMG is stapled, the ZIP is not.
+Releases up to v0.1.3 shipped separate macOS-only and Windows-only packages; the
+macOS packages from those releases do not load on Windows.
+Ordinary push/PR builds remain unsigned per-platform Actions artifacts; the manual
+**Build** workflow merges, signs and publishes new releases after verification.
 Verify signed downloads using
 the release's external `signing-provenance.json`, `SHA256SUMS` and macOS
 signature. The internal `build-manifest.json` intentionally describes unsigned
-input provenance; unsigned-only `scripts/unpack.py` rejects the signed ZIP.
-
-Quit the host, extract or open the appropriate package, copy **the entire
+macOS input provenance; unsigned-only `scripts/unpack.py` rejects the signed ZIP.
+Quit the host, extract the ZIP or open the DMG, copy **the entire
 `Splitter.bundle`** into the host project's `Plugins/` folder, and restart:
 
 ```text
@@ -37,8 +37,8 @@ Host/
   Plugins/
     Splitter.bundle/
       Contents/
-        MacOS/Splitter              # macOS package: arm64 + x86_64
-        Windows64/Splitter.4DX      # Windows package: x64
+        MacOS/Splitter              # macOS: arm64 + x86_64
+        Windows64/Splitter.4DX      # Windows: x64
         Resources/
           manifest.json
           constants.xlf
@@ -330,15 +330,17 @@ After bumping, open Actions → **Build** → **Run workflow**, select **main**,
 run it once. It rejects versions whose tag already exists, builds/tests both
 platforms using reusable [`native.yml`](.github/workflows/native.yml), then calls
 [`sign-macos.yml`](.github/workflows/sign-macos.yml) only after **all native and
-real-host checks succeed**. Both use the same dispatch commit and run. Native
+real-host checks succeed**. That job verifies both unsigned packages, requires
+their shared resources to be byte-identical, merges `Contents/Windows64/Splitter.4DX`
+into the universal bundle, then signs and notarizes the single cross-platform bundle. Both use the same dispatch commit and run. Native
 jobs have read-only permissions and no signing secrets. Signing receives only
 the six existing signing secrets; missing credentials or failed signing or
 notarization fail the run and prevent publication.
 
 The final isolated job verifies package hashes, source/run provenance and
 accepted notarizations, then creates `vX.Y.Z` at the dispatch commit and publishes
-a GitHub release containing the signed macOS ZIP/DMG, unsigned Windows x64 ZIP,
-external `signing-provenance.json` and `SHA256SUMS`. Only that job receives
+a GitHub release containing `Splitter-X.Y.Z.dmg` and `Splitter-X.Y.Z.zip` (the same
+cross-platform bundle), external `signing-provenance.json` and `SHA256SUMS`. Only that job receives
 `contents: write`. It uses `GITHUB_TOKEN` directly, not a PAT or a tag-triggered
 workflow; repository tag rules must allow creation of the version tag.
 Tags and releases are never replaced. If tag creation succeeds but publication
@@ -347,7 +349,8 @@ Build deliberately rejects the existing tag.
 
 Signing outputs and diagnostic logs remain available as Actions artifacts.
 The DMG is stapled; the ZIP is not. The unchanged internal build manifest describes the
-unsigned input; signed ZIPs intentionally fail unsigned-only `unpack.py`
+unsigned macOS input (the merged Windows binary is recorded in `windowsInput` of
+`signing-provenance.json`); signed ZIPs intentionally fail unsigned-only `unpack.py`
 verification and must instead be checked against their external signing
 provenance and macOS signature.
 

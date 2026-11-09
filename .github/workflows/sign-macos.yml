@@ -1,4 +1,4 @@
-name: Sign and notarize macOS artifacts
+name: Merge platforms, sign and notarize the plug-in bundle
 
 on:
   workflow_call:
@@ -56,7 +56,12 @@ jobs:
         with:
           name: macos-universal
           path: build/macos-signing/incoming
-      - name: Verify unsigned package and source provenance without credentials
+      - name: Download the validated Windows x64 artifact to merge into the bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: windows-x64
+          path: build/macos-signing/incoming-windows
+      - name: Verify unsigned packages, merge Windows x64 into the universal bundle
         run: bash scripts/sign_macos.sh prepare
       - name: Sign and notarize (all six secrets required)
         id: signing
