@@ -14,20 +14,20 @@ Splitter は [MIT ライセンス](LICENSE)で公開しています。配布バ�
 
 ## インストール
 
-公開済みのダウンロードは [v0.1.0](https://github.com/miyako/4d-plugin-splitter/releases/tag/v0.1.0) にあります。
-[`Splitter-macos-signed.dmg`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.dmg)
-と [`Splitter-macos-signed.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-macos-signed.zip)
-は arm64/x86_64 ユニバーサル版で、Developer ID 署名および公証済みです。
-DMG には公証チケットをステープルしていますが、ZIP にはステープルしていません。
-[`Splitter-windows-x64.zip`](https://github.com/miyako/4d-plugin-splitter/releases/download/v0.1.0/Splitter-windows-x64.zip)
-は未署名です。このリリースはビルド・署名ワークフローの実行後に手動で公開しました。
-通常のプッシュ・PR ビルドは引き続き未署名の Actions アーティファクトとして保存されます。
-新しいリリースは、手動実行する **Build** が検証後に署名・公開します。署名済みダウンロードの検証には、
+[Releases](https://github.com/miyako/4d-plugin-splitter/releases/latest) からダウンロードしてください。
+各リリースの `Splitter-X.Y.Z.dmg` と `Splitter-X.Y.Z.zip` には**同じクロスプラットフォームの
+`Splitter.bundle`** が入っています。macOS 用の arm64/x86_64 ユニバーサルバイナリ
+（Developer ID 署名・公証済み）と Windows x64 バイナリ（Authenticode 署名なし）を含みます。
+どちらのアーカイブもどちらのプラットフォームでも使用でき、Mac でダウンロードしたバンドルを
+Windows にコピーしても動作します。DMG には公証チケットをステープルしていますが、ZIP にはしていません。
+v0.1.3 までのリリースは macOS 専用と Windows 専用のパッケージを別々に配布していたため、
+それらの macOS パッケージは Windows では読み込まれません。
+通常のプッシュ・PR ビルドは引き続きプラットフォーム別の未署名 Actions アーティファクトとして保存されます。
+新しいリリースは、手動実行する **Build** が検証後に統合・署名・公開します。署名済みダウンロードの検証には、
 リリースに添付した外部の `signing-provenance.json`、`SHA256SUMS` と macOS の署名を使用してください。
-内部の `build-manifest.json` は、意図的に署名前の入力の来歴を記録したままにしています。
+内部の `build-manifest.json` は、意図的に署名前の macOS 入力の来歴を記録したままにしています。
 未署名パッケージ専用の `scripts/unpack.py` は署名済み ZIP を拒否します。
-
-ホストを終了し、適切なパッケージを展開または開いて、**`Splitter.bundle` 全体**を
+ホストを終了し、ZIP を展開するか DMG を開いて、**`Splitter.bundle` 全体**を
 ホストプロジェクトの `Plugins/` フォルダーにコピーし、ホストを再起動してください。
 
 ```text
@@ -36,8 +36,8 @@ Host/
   Plugins/
     Splitter.bundle/
       Contents/
-        MacOS/Splitter              # macOS package: arm64 + x86_64
-        Windows64/Splitter.4DX      # Windows package: x64
+        MacOS/Splitter              # macOS: arm64 + x86_64
+        Windows64/Splitter.4DX      # Windows: x64
         Resources/
           manifest.json
           constants.xlf
@@ -330,13 +330,16 @@ PAT や追加シークレットは不要です。
 再利用可能な [`native.yml`](.github/workflows/native.yml) で両プラットフォームを
 ビルド・検証し、**すべてのネイティブ・実ホスト検証に成功した後だけ**
 [`sign-macos.yml`](.github/workflows/sign-macos.yml) を呼び出します。
+このジョブは両方の未署名パッケージを検証し、共通リソースがバイト単位で一致することを確認したうえで
+`Contents/Windows64/Splitter.4DX` をユニバーサルバンドルに統合し、
+単一のクロスプラットフォームバンドルを署名・公証します。
 同じコミット・同じ実行の成果物を使用します。ネイティブジョブは読み取り専用権限で、
 署名シークレットは受け取りません。署名ジョブだけに既存の 6 つの署名シークレットを渡します。
 認証情報の不足、署名または公証の失敗時には実行を失敗させ、公開しません。
 
 最後の独立したジョブでパッケージハッシュ、ソース・実行の来歴、公証の Accepted を確認し、
 手動実行時のコミットに `vX.Y.Z` タグを作成して GitHub リリースを公開します。
-添付ファイルは署名済み macOS ZIP/DMG、未署名 Windows x64 ZIP、
+添付ファイルは `Splitter-X.Y.Z.dmg` と `Splitter-X.Y.Z.zip`（同じクロスプラットフォームバンドル）、
 外部の `signing-provenance.json` と `SHA256SUMS` です。
 このジョブだけに `contents: write` を付与します。`GITHUB_TOKEN` を直接使用し、
 PAT やタグによる別ワークフローの起動は不要です。
@@ -347,7 +350,8 @@ Build の再実行では、既存タグを意図的に拒否します。
 
 署名済み出力と診断ログは Actions アーティファクトにも保存します。
 DMG には公証チケットをステープルしますが、ZIP にはしません。
-変更しない内部のビルドマニフェストは未署名入力を記述しています。
+変更しない内部のビルドマニフェストは未署名の macOS 入力を記述しています
+（統合した Windows バイナリは `signing-provenance.json` の `windowsInput` に記録します）。
 署名済み ZIP は意図的に未署名専用の `unpack.py` 検証に失敗するため、
 代わりに外部の署名来歴と macOS の署名で検証する必要があります。
 

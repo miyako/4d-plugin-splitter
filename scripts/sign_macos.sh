@@ -39,18 +39,23 @@ validate_run() {
 }
 
 prepare() {
-    [[ ! -e "$WORK/unpacked" && ! -e "$WORK/prepared.json" ]]
+    [[ ! -e "$WORK/unpacked" && ! -e "$WORK/unpacked-windows" && ! -e "$WORK/prepared.json" ]]
     python3 scripts/unpack.py "$WORK/incoming/Splitter-macos-universal.zip" "$WORK/unpacked"
+    python3 scripts/unpack.py "$WORK/incoming-windows/Splitter-windows-x64.zip" "$WORK/unpacked-windows"
     python3 - <<'PY'
 import hashlib
 import json
 import os
 import pathlib
 import shutil
+import sys
 
 root = pathlib.Path(os.environ["ROOT"])
 work = pathlib.Path(os.environ["WORK"])
 bundle = pathlib.Path(os.environ["BUNDLE"])
+windows_bundle = work / "unpacked-windows/Splitter.bundle"
+sys.path.insert(0, str(root / "scripts"))
+import release
 evidence = pathlib.Path(os.environ["EVIDENCE"])
 run = json.loads((evidence / "native-run.json").read_text())
 manifest_path = bundle / "Contents/Resources/build-manifest.json"
@@ -86,8 +91,34 @@ for source, target in (
 assert (resources / "licenses/ICU-LICENSE.txt").is_file()
 assert {p.name for p in (bundle / "Contents/MacOS").iterdir()} == {"Splitter"}, \
     "Unexpected nested code; signing policy must be updated explicitly"
-assert not (bundle / "Contents/Windows64").exists(), "Not a macOS-only package"
+assert not (bundle / "Contents/Windows64").exists(), "macOS input must not already contain Windows code"
+
+# 4D plug-ins ship as ONE cross-platform bundle: merge the verified Windows x64
+# binary into the universal macOS bundle so both DMG and ZIP work on either OS.
+version, _ = release.read_version_sources()
+windows_manifest_path = windows_bundle / "Contents/Resources/build-manifest.json"
+windows_manifest = json.loads(windows_manifest_path.read_text())
+release.validate_windows(windows_manifest, version, os.environ)
+def bundle_files(path):
+    return {p.relative_to(path).as_posix(): p for p in path.rglob("*") if p.is_file()}
+mac_files = bundle_files(bundle)
+windows_files = bundle_files(windows_bundle)
+assert {k for k in windows_files if k.startswith("Contents/Windows64/")} == \
+    {"Contents/Windows64/Splitter.4DX"}, "Unexpected Windows package code"
+shared = lambda files, code: {
+    k for k in files if not k.startswith(code) and k != "Contents/Resources/build-manifest.json"
+}
+mac_shared = shared(mac_files, "Contents/MacOS/")
+assert mac_shared == shared(windows_files, "Contents/Windows64/"), \
+    "macOS and Windows packages have different resources"
+for key in sorted(mac_shared):
+    assert sha(mac_files[key]) == sha(windows_files[key]), f"Platform resources differ: {key}"
+windows_binary = bundle / "Contents/Windows64/Splitter.4DX"
+windows_binary.parent.mkdir()
+shutil.copyfile(windows_files["Contents/Windows64/Splitter.4DX"], windows_binary)
+assert {p.name for p in windows_binary.parent.iterdir()} == {"Splitter.4DX"}
 shutil.copyfile(manifest_path, evidence / "unsigned-build-manifest.json")
+shutil.copyfile(windows_manifest_path, evidence / "unsigned-windows-build-manifest.json")
 provenance = {
     "repository": manifest["repository"],
     "sourceRunId": run["id"],
@@ -100,6 +131,13 @@ provenance = {
         "sha256": sha(work / "incoming/Splitter-macos-universal.zip"),
     },
     "unsignedBuildManifestSha256": sha(manifest_path),
+    "version": version,
+    "windowsInput": {
+        "name": "Splitter-windows-x64.zip",
+        "sha256": sha(work / "incoming-windows/Splitter-windows-x64.zip"),
+        "buildManifestSha256": sha(windows_manifest_path),
+        "binarySha256": sha(windows_binary),
+    },
 }
 (work / "prepared.json").write_text(json.dumps(provenance, indent=2) + "\n")
 shutil.copyfile(work / "prepared.json", evidence / "unsigned-input.json")
@@ -107,7 +145,7 @@ PY
     [[ "$(lipo -archs "$BUNDLE/Contents/MacOS/Splitter")" == "x86_64 arm64" \
         || "$(lipo -archs "$BUNDLE/Contents/MacOS/Splitter")" == "arm64 x86_64" ]]
     lipo "$BUNDLE/Contents/MacOS/Splitter" -verify_arch arm64 x86_64
-    echo "Unsigned package and provenance verified; no downloaded code was executed."
+    echo "Unsigned macOS and Windows packages verified and merged; no downloaded code was executed."
 }
 
 notarize() {
@@ -156,7 +194,7 @@ PY
 }
 
 sign() {
-    local missing name identity details
+    local missing name identity details version zip dmg
     echo "signed=false" >> "$GITHUB_OUTPUT"
     missing="$(python3 - <<'PY'
 import os
@@ -221,19 +259,25 @@ PY
     printf '%s\n' "$details" | grep -E 'flags=.*runtime' > /dev/null
     echo "Developer ID identity, expected team, and hardened runtime verified." \
         > "$EVIDENCE/signing-policy.log"
-    ditto -c -k --sequesterRsrc --keepParent "$BUNDLE" "$OUTPUT/Splitter-macos-signed.zip"
-    notarize "$OUTPUT/Splitter-macos-signed.zip" zip
+    version="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["version"])' \
+        "$WORK/prepared.json")"
+    [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+    zip="$OUTPUT/Splitter-$version.zip"
+    dmg="$OUTPUT/Splitter-$version.dmg"
+    # The ZIP and DMG carry the same signed cross-platform Splitter.bundle.
+    ditto -c -k --sequesterRsrc --keepParent "$BUNDLE" "$zip"
+    notarize "$zip" zip
     mkdir "$WORK/dmg-root"
     ditto "$BUNDLE" "$WORK/dmg-root/Splitter.bundle"
     hdiutil create -volname Splitter -srcfolder "$WORK/dmg-root" -format UDZO \
-        "$OUTPUT/Splitter-macos-signed.dmg" > "$EVIDENCE/dmg-create.log"
+        "$dmg" > "$EVIDENCE/dmg-create.log"
     codesign --timestamp --options runtime --keychain "$KEYCHAIN" --sign "$identity" \
-        "$OUTPUT/Splitter-macos-signed.dmg"
-    codesign --verify --strict --verbose=2 "$OUTPUT/Splitter-macos-signed.dmg" \
+        "$dmg"
+    codesign --verify --strict --verbose=2 "$dmg" \
         2> "$EVIDENCE/dmg-codesign-verify.log"
-    notarize "$OUTPUT/Splitter-macos-signed.dmg" dmg
-    xcrun stapler staple "$OUTPUT/Splitter-macos-signed.dmg" > "$EVIDENCE/staple.log" 2>&1
-    xcrun stapler validate "$OUTPUT/Splitter-macos-signed.dmg" > "$EVIDENCE/staple-validate.log" 2>&1
+    notarize "$dmg" dmg
+    xcrun stapler staple "$dmg" > "$EVIDENCE/staple.log" 2>&1
+    xcrun stapler validate "$dmg" > "$EVIDENCE/staple-validate.log" 2>&1
     python3 - <<'PY'
 import hashlib
 import json
@@ -249,6 +293,8 @@ def sha(path):
 
 manifest = pathlib.Path(os.environ["BUNDLE"]) / "Contents/Resources/build-manifest.json"
 assert sha(manifest) == provenance["unsignedBuildManifestSha256"], "Unsigned manifest was changed"
+windows_binary = pathlib.Path(os.environ["BUNDLE"]) / "Contents/Windows64/Splitter.4DX"
+assert sha(windows_binary) == provenance["windowsInput"]["binarySha256"], "Windows binary was changed"
 provenance.update({
     "signingRunId": os.environ["GITHUB_RUN_ID"],
     "signingRunAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
@@ -264,6 +310,8 @@ provenance.update({
     "manifestSemantics": (
         "The sealed internal build-manifest.json is unchanged unsigned-build provenance. "
         "Its executable hash and signed=false describe the unsigned input, not these signed outputs. "
+        "It lists only the macOS input files; Contents/Windows64/Splitter.4DX was merged from the "
+        "verified Windows x64 input recorded in windowsInput before signing. "
         "scripts/unpack.py is an unsigned-package verifier and rejects the signed ZIP. "
         "Verify these external final hashes and use codesign to verify the signed bundle instead."
     ),
