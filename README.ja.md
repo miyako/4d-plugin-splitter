@@ -1,6 +1,6 @@
 # Splitter
 
-[English](README.md) | [日本語](README.ja.md)
+[English](README.md) | 日本語
 
 [`miyako/4d-plugin-splitter`](https://github.com/miyako/4d-plugin-splitter) で開発している、4D 用のネイティブなテキスト処理ツールキットです。
 M1（最初の実装マイルストーンの意味で、Apple M1 とは無関係）では、

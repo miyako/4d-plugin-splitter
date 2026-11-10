@@ -1,6 +1,6 @@
 # Splitter
 
-[English](README.md) | [日本語](README.ja.md)
+English | [日本語](README.ja.md)
 
 Native 4D text toolkit in [`miyako/4d-plugin-splitter`](https://github.com/miyako/4d-plugin-splitter).
 M1 (the first implementation milestone, not Apple M1) implements
